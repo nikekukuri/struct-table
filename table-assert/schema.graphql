@@ -1,0 +1,45 @@
+schema {
+	query: QueryRoot
+	mutation: MutationRoot
+}
+
+type QueryRoot {
+	table(id: Int!): ChildTable
+	tableByColumns(col: String!): ChildTable
+}
+
+type ChildTable {
+	id: Int!
+	col1: String!
+	col2: String!
+	col3: Int!
+	col4: Float!
+	created_at: String!
+}
+
+type GrandChildTable {
+	id: Int!
+	col1: String!
+	col2: String!
+	created_at: String!
+}
+
+type MutationRoot {
+	createTable(input: createTableInput!): ChildTable!
+	updateTable(input: updateTableInput!): ChildTable!
+}
+
+type createTableInput {
+	col1: String!
+	col2: String!
+	col3: Int!
+	col4: Float!
+}
+
+type updateTableInput {
+	id: Int!
+	col1: String!
+	col2: String!
+	col3: Int!
+	col4: Float!
+}
