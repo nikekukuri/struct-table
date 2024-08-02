@@ -1,0 +1,10 @@
+mutation {
+	createTable(input: {
+		col1: "test",
+		col2: "foo",
+		col3: 42,
+		col4: 3.14
+	}) {
+		id
+	}
+}
