@@ -1,7 +1,7 @@
 use async_graphql::Object;
 use sqlx::postgres::PgPool;
 
-pub struct QueryRoot; 
+pub struct QueryRoot;
 
 #[Object]
 impl QueryRoot {

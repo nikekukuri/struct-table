@@ -3,14 +3,10 @@ use async_graphql_rocket::{GraphQLQuery, GraphQLRequest, GraphQLResponse};
 use rocket::{response::content, routes, State};
 use sqlx::postgres::PgPoolOptions;
 
-mod model;
 mod db;
+mod model;
 
-use crate::model::{
-    TableSchema,
-    query::QueryRoot,
-    mutation::MutationRoot
-};
+use crate::model::{mutation::MutationRoot, query::QueryRoot, TableSchema};
 
 #[rocket::get("/")]
 fn graphiql() -> content::RawHtml<String> {
@@ -23,10 +19,7 @@ async fn graphql_query(schema: &State<TableSchema>, query: GraphQLQuery) -> Grap
 }
 
 #[rocket::post("/graphql", data = "<request>", format = "application/json")]
-async fn graphql_request(
-    schema: &State<TableSchema>,
-    request: GraphQLRequest,
-) -> GraphQLResponse {
+async fn graphql_request(schema: &State<TableSchema>, request: GraphQLRequest) -> GraphQLResponse {
     request.execute(schema.inner()).await
 }
 

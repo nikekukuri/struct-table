@@ -2,8 +2,8 @@ use anyhow::Result;
 use async_graphql::{InputObject, Object};
 use sqlx::postgres::PgPool;
 
-use crate::model::ChildTable;
 use crate::db::TableRecord;
+use crate::model::ChildTable;
 
 pub struct MutationRoot;
 
@@ -54,4 +54,3 @@ impl MutationRoot {
         Ok(gql_table)
     }
 }
-
