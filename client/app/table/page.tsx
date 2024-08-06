@@ -56,8 +56,8 @@ const client = new ApolloClient({
 });
 
 const GET_ONE_RECORD = gql`
-  query {
-    getAllColumns(id: 4) {
+  query getAllColumns($id: Int!) {
+    getAllColumns(id: $id) {
       col1
       col2
       col3
@@ -66,8 +66,10 @@ const GET_ONE_RECORD = gql`
   }
 `;
 
-const TestTable: React.FC = () => {
-  const { loading, error, data } = useQuery(GET_ONE_RECORD);
+const TestTable: React.FC<{ id: number }> = ({ id }) => {
+  const { loading, error, data } = useQuery(GET_ONE_RECORD, {
+    variables: { id }
+  });
 
   console.log(data);
 
@@ -75,21 +77,26 @@ const TestTable: React.FC = () => {
   if (error) return <p>Error {error.message}</p>;
 
   return (
-    <Table2 numRows={data.users.length}>
+    <Table2 numRows={data.getAllColumns.length}>
       <Column
         name="col1"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col1" />}
-        cellRenderer={(rowIndex: number) => <Cell>{data.users[rowIndex].col1}</Cell>}
+        cellRenderer={(rowIndex: number) => <Cell>{data.getAllColumns[rowIndex].col1}</Cell>}
       />
       <Column
         name="col2"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col2" />}
-        cellRenderer={(rowIndex: number) => <Cell>{data.users[rowIndex].col2}</Cell>}
+        cellRenderer={(rowIndex: number) => <Cell>{data.getAllColumns[rowIndex].col2}</Cell>}
       />
       <Column
         name="col3"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col3" />}
-        cellRenderer={(rowIndex: number) => <Cell>{data.users[rowIndex].col3}</Cell>}
+        cellRenderer={(rowIndex: number) => <Cell>{data.getAllColumns[rowIndex].col3}</Cell>}
+      />
+      <Column
+        name="col4"
+        columnHeaderCellRenderer={() => <ColumnHeaderCell name="col4" />}
+        cellRenderer={(rowIndex: number) => <Cell>{data.getAllColumns[rowIndex].col4}</Cell>}
       />
     </Table2>
   );
@@ -98,7 +105,10 @@ const TestTable: React.FC = () => {
 const Tables: React.FC = () => {
   return (
     <ApolloProvider client={client}>
-      <TestTable />
+      <div className="App">
+        <h1>Blueprint.js Table Example</h1>
+        <TestTable id={4} /> {/* IDを必要に応じて変更 */}
+      </div>
     </ApolloProvider>
   );
 }
