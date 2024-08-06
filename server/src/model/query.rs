@@ -1,3 +1,5 @@
+use crate::db::TableRecord;
+use crate::model::ChildTable;
 use async_graphql::Object;
 use sqlx::postgres::PgPool;
 
@@ -9,5 +11,21 @@ impl QueryRoot {
         let pool = ctx.data::<PgPool>()?;
         let (answer,): (i32,) = sqlx::query_as("select 42;").fetch_one(pool).await?;
         Ok(answer)
+    }
+
+    async fn get_all_col(
+        &self,
+        ctx: &async_graphql::Context<'_>,
+        id: i32,
+    ) -> Result<Option<ChildTable>, async_graphql::Error> {
+        let pool = ctx.data::<PgPool>()?;
+        let table_record: Option<TableRecord> = sqlx::query_as(
+            "select id, col1, col2, col3, col4, created_at from child_table where id = $1;",
+        )
+        .bind(id)
+        .fetch_optional(pool)
+        .await?;
+        let table = table_record.map(Into::into);
+        Ok(table)
     }
 }

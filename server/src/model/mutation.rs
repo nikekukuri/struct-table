@@ -49,6 +49,7 @@ impl MutationRoot {
             col2: table_record.col2,
             col3: table_record.col3,
             col4: table_record.col4,
+            created_at: table_record.created_at,
         };
         tx.commit().await?;
         Ok(gql_table)
