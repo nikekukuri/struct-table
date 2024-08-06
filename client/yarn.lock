@@ -509,12 +509,35 @@
     tslib "~2.6.2"
     use-sync-external-store "^1.2.0"
 
+"@blueprintjs/docs-theme@^5.3.8":
+  version "5.3.8"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/docs-theme/-/docs-theme-5.3.8.tgz#ca031daf61d08319e8721c9b7f02db2b7916b554"
+  integrity sha512-AkexmhRSotg1GdCw4c5asbQ0aI1qtoPXvV4gLkG0aj55oD+FQx6OqK90vmY3g3iK1f0QJNJv6yNHQXDA2ryQnQ==
+  dependencies:
+    "@blueprintjs/colors" "^5.1.1"
+    "@blueprintjs/core" "^5.11.0"
+    "@blueprintjs/select" "^5.2.2"
+    "@documentalist/client" "^5.0.0"
+    classnames "^2.3.1"
+    fuzzaldrin-plus "^0.6.0"
+    tslib "~2.6.2"
+
 "@blueprintjs/icons@^5.11.0":
   version "5.11.0"
   resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-5.11.0.tgz#dafb5905a6d940be6a2bf712a9a1d7191e363f9e"
   integrity sha512-2SyJgeol61hSaxdGrwPdzCx0cA5TEboc18oJYWQ31TZkidN3NWuH0Z4aEvugtM1+NR3W0Vcd/+1xIe5Y32pwTQ==
   dependencies:
     change-case "^4.1.2"
+    classnames "^2.3.1"
+    tslib "~2.6.2"
+
+"@blueprintjs/select@^5.2.2":
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/select/-/select-5.2.2.tgz#c649aeca4536481312142bffd31a920b22fa0c6b"
+  integrity sha512-oJeYa+SaHhk2gwhBr7ZyDL7B8hGvDb1EM3my3RevQxfaSmLx73436yUrwJocBRjJE03UtlchFZFPBRdZ8n/eIQ==
+  dependencies:
+    "@blueprintjs/core" "^5.11.0"
+    "@blueprintjs/icons" "^5.11.0"
     classnames "^2.3.1"
     tslib "~2.6.2"
 
@@ -527,6 +550,11 @@
     classnames "^2.3.1"
     react-innertext "^1.1.5"
     tslib "~2.6.2"
+
+"@documentalist/client@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@documentalist/client/-/client-5.0.0.tgz#fbe47084abb855eba436b0306caf3b016fe63087"
+  integrity sha512-I4yh9qcP4jO2LeBU9y9K+ms0uhDHzmIEnhUpcPnjXKAoK2O4wrOKRM6JhzDEZ1WL5X2eW6h/zX5q+/PqIimfFw==
 
 "@eslint-community/eslint-utils@^4.2.0":
   version "4.4.0"
@@ -1334,6 +1362,13 @@
   version "18.3.0"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.3.0.tgz#0cbc818755d87066ab6ca74fbedb2547d74a82b0"
   integrity sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==
+  dependencies:
+    "@types/react" "*"
+
+"@types/react-table@^7.7.20":
+  version "7.7.20"
+  resolved "https://registry.yarnpkg.com/@types/react-table/-/react-table-7.7.20.tgz#2f68e70ca7a703ad8011a8da55c38482f0eb4314"
+  integrity sha512-ahMp4pmjVlnExxNwxyaDrFgmKxSbPwU23sGQw2gJK4EhCvnvmib2s/O/+y1dfV57dXOwpr2plfyBol+vEHbi2w==
   dependencies:
     "@types/react" "*"
 
@@ -2853,6 +2888,11 @@ functions-have-names@^1.2.3:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
+fuzzaldrin-plus@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/fuzzaldrin-plus/-/fuzzaldrin-plus-0.6.0.tgz#832f6489fbe876769459599c914a670ec22947ee"
+  integrity sha512-srIDThJHkdp3aPwJpR/HNzYZCRJwm07b/igxseoHSB7qR8e/gQp4F6lMGknE3TQI1Aq14TiFf/wzrHOp9LY/EA==
+
 gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"
   resolved "https://registry.yarnpkg.com/gensync/-/gensync-1.0.0-beta.2.tgz#32a6ee76c3d7f52d46b2b1ae5d93fea8580a25e0"
@@ -4299,6 +4339,11 @@ react-popper@^2.3.0:
   dependencies:
     react-fast-compare "^3.0.1"
     warning "^4.0.2"
+
+react-table@^7.8.0:
+  version "7.8.0"
+  resolved "https://registry.yarnpkg.com/react-table/-/react-table-7.8.0.tgz#07858c01c1718c09f7f1aed7034fcfd7bda907d2"
+  integrity sha512-hNaz4ygkZO4bESeFfnfOft73iBUj8K5oKi1EcSHPAibEydfsX2MyU6Z8KCr3mv3C9Kqqh71U+DhZkFvibbnPbA==
 
 react-transition-group@^4.4.5:
   version "4.4.5"

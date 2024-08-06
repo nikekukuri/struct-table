@@ -44,4 +44,16 @@ export type MutationRootCreateTableArgs = {
 export type QueryRoot = {
   __typename?: 'QueryRoot';
   answer: Scalars['Int']['output'];
+  getAllColumns?: Maybe<ChildTable>;
+  getAllRecords: Array<ChildTable>;
+};
+
+
+export type QueryRootGetAllColumnsArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type QueryRootGetAllRecordsArgs = {
+  id: Scalars['Int']['input'];
 };

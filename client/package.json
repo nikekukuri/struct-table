@@ -18,12 +18,14 @@
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
+    "react-table": "^7.8.0",
     "string-width": "4.2.3",
     "strip-ansi": "6.0.1",
     "strip-ansi-cjs": "6.0.1"
   },
   "devDependencies": {
     "@0no-co/graphqlsp": "^1.12.12",
+    "@blueprintjs/docs-theme": "^5.3.8",
     "@graphql-codegen/cli": "^5.0.2",
     "@graphql-codegen/client-preset": "^4.3.3",
     "@graphql-codegen/introspection": "^4.0.3",
@@ -32,6 +34,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-table": "^7.7.20",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "postcss": "^8",
