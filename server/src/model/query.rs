@@ -13,7 +13,7 @@ impl QueryRoot {
         Ok(answer)
     }
 
-    async fn get_all_col(
+    async fn get_all_columns(
         &self,
         ctx: &async_graphql::Context<'_>,
         id: i32,
@@ -27,5 +27,22 @@ impl QueryRoot {
         .await?;
         let table = table_record.map(Into::into);
         Ok(table)
+    }
+
+    async fn get_all_records(
+        &self,
+        ctx: &async_graphql::Context<'_>,
+        id: i32,
+    ) -> Result<Vec<ChildTable>, async_graphql::Error> {
+        let pool = ctx.data::<PgPool>()?;
+        let table_record_vec: Vec<TableRecord> = sqlx::query_as(
+            "select id, col1, col2, col3, col4, created_at from child_table",
+        )
+        .bind(id)
+        .fetch_all(pool)
+        .await?;
+
+        //let table = table_record_vec.map(Into::into);
+        Ok(table_record_vec.into_iter().map(Into::into).collect())
     }
 }
