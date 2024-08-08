@@ -31,7 +31,6 @@ async fn rocket() -> _ {
         .connect("postgresql:///struct_table")
         .await
         .unwrap();
-    //let query_root = QueryRoot;
     let scheme = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
         .data(pool)
         .finish();
