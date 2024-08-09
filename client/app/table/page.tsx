@@ -8,7 +8,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider, gql, useQuery } from '@apo
 import { Cell, Column, ColumnHeaderCell, Table2 } from "@blueprintjs/table";
 import './style.css'
 
-// this will obviously get outdated, it's valid only as of August 2021
+/// this will obviously get outdated, it's valid only as of August 2021
 const USD_TO_EURO_CONVERSION = 0.85;
 
 export class TableDollarExample extends React.PureComponent<ExampleProps> {
@@ -66,37 +66,45 @@ const GET_ONE_RECORD = gql`
   }
 `;
 
-const TestTable: React.FC<{ id: number }> = ({ id }) => {
-  const { loading, error, data } = useQuery(GET_ONE_RECORD, {
-    variables: { id }
-  });
+const TestTable: React.FC<{ id: number, quadrantType: string }> = ({ id, quadrantType }) => {
 
-  console.log(data);
+  if (quadrantType !== "top-left") {
+    return null;
+  }
+
+  const { loading, error, data } = useQuery(GET_ONE_RECORD, {
+    variables: { id },
+  });
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error {error.message}</p>;
 
+
+  if (data === undefined) {
+    return <p> No data available</p>;
+  }
+
   return (
-    <Table2 numRows={data.getAllColumns.length}>
+    <Table2 numRows={1}>
       <Column
         name="col1"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col1" />}
-        cellRenderer={(rowIndex: number) => <Cell>{data.getAllColumns[rowIndex].col1}</Cell>}
+        cellRenderer={() => <Cell>{data.getAllColumns.col1}</Cell>}
       />
       <Column
         name="col2"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col2" />}
-        cellRenderer={(rowIndex: number) => <Cell>{data.getAllColumns[rowIndex].col2}</Cell>}
+        cellRenderer={() => <Cell>{data.getAllColumns.col2}</Cell>}
       />
       <Column
         name="col3"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col3" />}
-        cellRenderer={(rowIndex: number) => <Cell>{data.getAllColumns[rowIndex].col3}</Cell>}
+        cellRenderer={() => <Cell>{data.getAllColumns.col3}</Cell>}
       />
       <Column
         name="col4"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col4" />}
-        cellRenderer={(rowIndex: number) => <Cell>{data.getAllColumns[rowIndex].col4}</Cell>}
+        cellRenderer={() => <Cell>{data.getAllColumns.col4}</Cell>}
       />
     </Table2>
   );
@@ -107,7 +115,7 @@ const Tables: React.FC = () => {
     <ApolloProvider client={client}>
       <div className="App">
         <h1>Blueprint.js Table Example</h1>
-        <TestTable id={4} /> {/* IDを必要に応じて変更 */}
+        <TestTable id={3} quadrantType="top-left" /> {/* IDを必要に応じて変更 */}
       </div>
     </ApolloProvider>
   );
