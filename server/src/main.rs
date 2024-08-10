@@ -1,9 +1,13 @@
 use async_graphql::{http::GraphiQLSource, EmptySubscription, Schema};
 use async_graphql_rocket::{GraphQLQuery, GraphQLRequest, GraphQLResponse};
-use rocket::{http::{Method, Header}, response::content, routes, State, Request, Response};
 use rocket::fairing::{Fairing, Info, Kind};
-use sqlx::postgres::PgPoolOptions;
+use rocket::{
+    http::{Header, Method},
+    response::content,
+    routes, Request, Response, State,
+};
 use rocket_cors::{AllowedHeaders, AllowedOrigins, CorsOptions};
+use sqlx::postgres::PgPoolOptions;
 
 mod db;
 mod model;
@@ -17,7 +21,7 @@ impl Fairing for CustomCros {
     fn info(&self) -> Info {
         Info {
             name: "Custom CORS",
-            kind: Kind::Response
+            kind: Kind::Response,
         }
     }
 
@@ -26,11 +30,16 @@ impl Fairing for CustomCros {
             res.set_status(rocket::http::Status::Ok);
         }
         res.set_header(Header::new("Access-Control-Allow-Origin", "*"));
-        res.set_header(Header::new("Access-Control-Allow-Methods", "GET, POST, OPTIONS"));
-        res.set_header(Header::new("Access-Control-Allow-Headers", "Authorization, Content-Type"));
+        res.set_header(Header::new(
+            "Access-Control-Allow-Methods",
+            "GET, POST, OPTIONS",
+        ));
+        res.set_header(Header::new(
+            "Access-Control-Allow-Headers",
+            "Authorization, Content-Type",
+        ));
     }
 }
-
 
 #[rocket::get("/")]
 fn graphiql() -> content::RawHtml<String> {
@@ -65,7 +74,10 @@ async fn rocket() -> _ {
 
     rocket::build()
         .manage(scheme)
-        .mount("/", routes![graphiql, graphql_query, graphql_request, graphql_options])
+        .mount(
+            "/",
+            routes![graphiql, graphql_query, graphql_request, graphql_options],
+        )
         .attach(CustomCros)
 }
 
@@ -74,10 +86,13 @@ fn cors_options() -> CorsOptions {
 
     CorsOptions {
         allowed_origins,
-        allowed_methods: vec![Method::Get, Method::Post, Method::Options].into_iter().map(From::from).collect(),
+        allowed_methods: vec![Method::Get, Method::Post, Method::Options]
+            .into_iter()
+            .map(From::from)
+            .collect(),
         allowed_headers: AllowedHeaders::all(),
         allow_credentials: true,
-        
+
         ..Default::default()
     }
 }
