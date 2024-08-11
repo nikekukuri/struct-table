@@ -66,15 +66,25 @@ const GET_ONE_RECORD = gql`
   }
 `;
 
-const TestTable: React.FC<{ id: number, quadrantType: string }> = ({ id, quadrantType }) => {
+const GET_ALL_RECORD = gql`
+  query {
+    getAllRecords {
+      col1
+      col2
+      col3
+      col4
+    }
+  }
+`;
+
+const TestTable: React.FC<{ quadrantType: string }> = ({ quadrantType }) => {
 
   if (quadrantType !== "top-left") {
     return null;
   }
 
-  const { loading, error, data } = useQuery(GET_ONE_RECORD, {
-    variables: { id },
-  });
+  const { loading, error, data } = useQuery(GET_ALL_RECORD);
+  console.log(data);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error {error.message}</p>;
@@ -84,27 +94,30 @@ const TestTable: React.FC<{ id: number, quadrantType: string }> = ({ id, quadran
     return <p> No data available</p>;
   }
 
+  const records = data.getAllRecords;
+  console.log(records);
+
   return (
-    <Table2 numRows={1}>
+    <Table2 numRows={records.length}>
       <Column
         name="col1"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col1" />}
-        cellRenderer={() => <Cell>{data.getAllColumns.col1}</Cell>}
+        cellRenderer={(rowIndex) => <Cell>{records[rowIndex].col1}</Cell>}
       />
       <Column
         name="col2"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col2" />}
-        cellRenderer={() => <Cell>{data.getAllColumns.col2}</Cell>}
+        cellRenderer={(rowIndex) => <Cell>{records[rowIndex].col2}</Cell>}
       />
       <Column
         name="col3"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col3" />}
-        cellRenderer={() => <Cell>{data.getAllColumns.col3}</Cell>}
+        cellRenderer={(rowIndex) => <Cell>{records[rowIndex].col3}</Cell>}
       />
       <Column
         name="col4"
         columnHeaderCellRenderer={() => <ColumnHeaderCell name="col4" />}
-        cellRenderer={() => <Cell>{data.getAllColumns.col4}</Cell>}
+        cellRenderer={(rowIndex) => <Cell>{records[rowIndex].col4}</Cell>}
       />
     </Table2>
   );
