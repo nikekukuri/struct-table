@@ -1,6 +1,6 @@
 use async_graphql::{EmptySubscription, Object, Schema};
 
-use crate::db::TableRecord;
+use crate::db::{TableRecord, ExampleRecord};
 use crate::model::mutation::MutationRoot;
 use crate::model::query::QueryRoot;
 
@@ -62,4 +62,106 @@ impl ChildTable {
     async fn col4(&self) -> f64 {
         self.col4
     }
+}
+
+#[derive(Debug)]
+pub struct ExampleTable {
+    pub passenger_id: i32,
+    pub survived: i32,
+    pub pclass: i32,
+    pub name: String,
+    pub sex: String,
+    pub age: f64,
+    pub sibsp: i32,
+    pub parch: i32,
+    pub ticket: String,
+    pub fare: f64,
+    pub cabin: String,
+    pub embarked: String,
+}
+
+impl From<ExampleRecord> for ExampleTable {
+    fn from(
+        ExampleRecord {
+            passenger_id,
+            survived,
+            pclass,
+            name,
+            sex,
+            age,
+            sibsp,
+            parch,
+            ticket,
+            fare,
+            cabin,
+            embarked,
+        }: ExampleRecord,
+    ) -> Self {
+        Self {
+            passenger_id,
+            survived,
+            pclass,
+            name,
+            sex,
+            age,
+            sibsp,
+            parch,
+            ticket,
+            fare,
+            cabin,
+            embarked,
+        }
+    }
+}
+
+#[Object]
+impl ExampleTable {
+    async fn passenger_id(&self) -> i32 {
+        self.passenger_id
+    }
+
+    async fn survived(&self) -> i32 {
+        self.survived
+    }
+
+    async fn pclass(&self) -> i32 {
+        self.pclass
+    }
+
+    async fn name(&self) -> &str {
+        &self.name
+    }
+    
+    async fn sex(&self) -> &str {
+        &self.sex
+    }
+
+    async fn age(&self) -> f64 {
+        self.age
+    }
+    
+    async fn sibsp(&self) -> i32 {
+        self.sibsp
+    }
+    
+    async fn parch(&self) -> i32 {
+        self.parch
+    }
+    
+    async fn ticket(&self) -> &str {
+        &self.ticket
+    }
+    
+    async fn fare(&self) -> f64 {
+        self.fare
+    }
+    
+    async fn cabin(&self) -> &str {
+        &self.cabin
+    }
+    
+    async fn embarked(&self) -> &str {
+        &self.embarked
+    }
+    
 }
