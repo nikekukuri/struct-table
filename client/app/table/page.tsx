@@ -248,25 +248,32 @@ const Tables: React.FC = () => {
         <h1 className="text-center text-xl font-bold mb-4">Blueprint.js Table Example</h1>
         <div className="flex justify-center mb-4">
           <div className="flex space-x-4">
-            <label className="inline-flex items-center">
+            <label className={`${selectedTable === "testTable"
+              ? "bg-blue-400 text-white font-bold"
+              : "text-slate-400 hover:bg-blue-100 transition"
+              } border border-slate-100 border-r-0 text-blue rounded-l-lg p-2 `}
+            >
               <input
                 type="radio"
                 name="table"
                 value="testTable"
                 checked={selectedTable === 'testTable'}
                 onChange={() => setSelectedTable('testTable')}
-                className="form-radio"
+                className="hidden"
               />
               <span className="ml-2">TestTable</span>
             </label>
-            <label className="inline-flex items-center">
+            <label className={`${selectedTable === "exampleTable"
+              ? "bg-blue-400 text-white font-bold"
+              : "text-slate-400 hover:bg-blue-100 transition"
+              } border border-slate-100 border-l-0 text-blue rounded-r-lg p-2 `}>
               <input
                 type="radio"
                 name="table"
                 value="exampleTable"
                 checked={selectedTable === 'exampleTable'}
                 onChange={() => setSelectedTable('exampleTable')}
-                className="form-radio"
+                className="hidden"
               />
               <span className="ml-2">ExampleTable</span>
             </label>
@@ -276,7 +283,7 @@ const Tables: React.FC = () => {
         {selectedTable === 'exampleTable' && <ExampleTable quadrantType="top-left" />}
       </div>
 
-    </ApolloProvider>
+    </ApolloProvider >
   );
 }
 
