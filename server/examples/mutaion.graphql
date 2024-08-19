@@ -1,0 +1,8 @@
+mutation {
+  createTableFromCsv(
+    csvFilePath: "/path/to/file",
+    tableName: "import_csv_test"
+  ) {
+    message
+  }
+}
