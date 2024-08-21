@@ -26,19 +26,8 @@ const ToggleViewColumn: React.FC = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error {error.message}</p>;
   const column_names: string[] = data.getTableColumns;
-  console.log(column_names);
+  return column_names;
 }
-
-const GET_ONE_RECORD = gql`
-  query getAllColumns($id: Int!) {
-    getAllColumns(id: $id) {
-      col1
-      col2
-      col3
-      col4
-    }
-  }
-`;
 
 const GET_ALL_RECORD = gql`
   query {
@@ -70,6 +59,35 @@ query {
 }
 `;
 
+const getColumnsFromTableName = (tableName: string): string[] => {
+  const getColumnNames = gql`
+    query {
+      getTableColumns(tableName: "${tableName}")
+    }
+  `;
+
+  const { loading, error, data } = useQuery(getColumnNames, {
+    variables: { tableName },
+  });
+
+  if (loading || error || !data || !Array.isArray(data.getTableColumns)) {
+    return [];
+  }
+
+  return data.getTableColumns;
+}
+
+// FIXME: query string expand from 'fields' argument
+const queryTable = (fields: string[]): any => {
+    const getAllRecord = gql`
+    query {
+      getExampleRecords {
+        ${fields.join(`\n`)}
+      }
+    }`;
+
+  return useQuery(getAllRecord);
+}
 
 const ExampleTable: React.FC<{ quadrantType: string }> = ({ quadrantType }) => {
 
@@ -77,7 +95,11 @@ const ExampleTable: React.FC<{ quadrantType: string }> = ({ quadrantType }) => {
     return null;
   }
 
-  const { loading, error, data } = useQuery(GET_EXAMPLE_RECORD);
+  //const { loading, error, data } = useQuery(GET_EXAMPLE_RECORD);
+  const tableName: string = "titanic_table";
+  const fields: string[] = getColumnsFromTableName(tableName);
+  console.log(fields);
+  const { loading, error, data } = queryTable(fields);
 
   const [filter, setFilter] = useState<{ [key: string]: string }>({});
 
@@ -112,7 +134,7 @@ const ExampleTable: React.FC<{ quadrantType: string }> = ({ quadrantType }) => {
                 type="text"
                 value={filter[column] || ''}
                 onChange={(e) => setFilter({ ...filter, [column]: e.target.value })}
-                placeholder={`Filter ${column}`}
+                placeholder={`Filter ${column} `}
               />
             </ColumnHeaderCell>
           )}
@@ -251,7 +273,7 @@ const Tables: React.FC = () => {
             <label className={`${selectedTable === "testTable"
               ? "bg-blue-400 text-white font-bold"
               : "text-slate-400 hover:bg-blue-100 transition"
-              } border border-slate-100 border-r-0 text-blue rounded-l-lg p-2 `}
+              } border border - slate - 100 border - r - 0 text - blue rounded - l - lg p - 2 `}
             >
               <input
                 type="radio"
@@ -266,7 +288,7 @@ const Tables: React.FC = () => {
             <label className={`${selectedTable === "exampleTable"
               ? "bg-blue-400 text-white font-bold"
               : "text-slate-400 hover:bg-blue-100 transition"
-              } border border-slate-100 border-l-0 text-blue rounded-r-lg p-2 `}>
+              } border border - slate - 100 border - l - 0 text - blue rounded - r - lg p - 2 `}>
               <input
                 type="radio"
                 name="table"
