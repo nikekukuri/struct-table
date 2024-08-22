@@ -47,17 +47,25 @@ impl QueryRoot {
         ctx: &async_graphql::Context<'_>,
         table_name: String,
     ) -> Result<Vec<String>, async_graphql::Error> {
+        println!("Received query for table: {}", table_name);
         let pool = ctx.data::<PgPool>()?;
         let columns = sqlx::query_as::<_, (String,)>(
             "select column_name from information_schema.columns where table_name = $1;",
         )
-        .bind(table_name)
+        .bind(table_name.to_lowercase())
         .fetch_all(pool)
-        .await
-        .unwrap();
+        .await;
 
-        let column_names = columns.into_iter().map(|c| c.0).collect::<Vec<String>>();
-        Ok(column_names)
+        match columns {
+            Ok(cols) => {
+                let column_names = cols.into_iter().map(|c| c.0).collect::<Vec<String>>();
+                Ok(column_names)
+            }
+            Err(e) => {
+                println!("Failed to fetch columns: {}", e);
+                Err(async_graphql::Error::new("Failed to fetch columns"))
+            }
+        }
     }
 
     async fn get_example_records(
