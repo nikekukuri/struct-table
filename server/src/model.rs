@@ -1,6 +1,6 @@
 use async_graphql::{EmptySubscription, Object, Schema};
 
-use crate::db::{TableRecord, ExampleRecord};
+use crate::db::{ExampleRecord, TableRecord};
 use crate::model::mutation::MutationRoot;
 use crate::model::query::QueryRoot;
 
@@ -39,6 +39,19 @@ impl From<TableRecord> for ChildTable {
             created_at,
         }
     }
+}
+
+#[warn(unused_macros)]
+macro_rules! async_getters {
+    ($struct_name:ident, { $($field:ident : $type:ty),* $(,)? }) => {
+        impl $struct_name {
+            $(
+                pub async fn $field(&self) -> $type {
+                    self.$field.clone()
+                }
+            )*
+        }
+    };
 }
 
 #[Object]
@@ -131,7 +144,7 @@ impl ExampleTable {
     async fn name(&self) -> &str {
         &self.name
     }
-    
+
     async fn sex(&self) -> &str {
         &self.sex
     }
@@ -139,29 +152,28 @@ impl ExampleTable {
     async fn age(&self) -> f64 {
         self.age
     }
-    
+
     async fn sibsp(&self) -> i32 {
         self.sibsp
     }
-    
+
     async fn parch(&self) -> i32 {
         self.parch
     }
-    
+
     async fn ticket(&self) -> &str {
         &self.ticket
     }
-    
+
     async fn fare(&self) -> f64 {
         self.fare
     }
-    
+
     async fn cabin(&self) -> &str {
         &self.cabin
     }
-    
+
     async fn embarked(&self) -> &str {
         &self.embarked
     }
-    
 }
