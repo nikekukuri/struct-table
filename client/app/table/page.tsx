@@ -1,97 +1,130 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect, useMemo } from "react";
-
-import { ApolloClient, InMemoryCache, ApolloProvider, useQuery } from '@apollo/client';
+import { useState, useEffect } from "react";
+import _ from 'lodash';
 import { Cell, Column, ColumnHeaderCell, Table2 } from "@blueprintjs/table";
 import './style.css'
-import { gql } from 'graphql-tag';
-
-// Apollo client setup
-const client = new ApolloClient({
-  uri: "http://localhost:8000/graphql",
-  cache: new InMemoryCache(),
-});
-
-const getColumnsFromTableName = (tableName: string): string[] => {
-  const [columns, setColumns] = useState<string[]>([]);
-
-  const GET_TABLE_COLUMNS = gql`
-    query {
-      getTableColumns(tableName: "${tableName}")
-    }
-  `;
-
-  const { loading, error, data } = useQuery(GET_TABLE_COLUMNS, {
-    fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
-  });
-  console.log(data);
-
-  useEffect(() => {
-    if (!loading && !error && data && Array.isArray(data.getTableColumns)) {
-      setColumns(data.getTableColumns);
-    }
-  }, [loading, error, data]);
-
-  if (loading) {
-    console.log("Loading ...");
-  }
-
-  if (error) {
-    console.error("GraphQL error: ", error.graphQLErrors);
-    console.error("Network error: ", error.networkError);
-  }
-
-  return columns;
-};
-
-const fetchDataByColumns = (cols: string[]): any => {
-  if (cols.length === 0) {
-    return { loading: true, error: null, data: null };
-  }
-
-  const query = gql`
-    query {
-      getExampleRecords {
-        ${cols.join("\n")}
-      }
-    }`;
-
-  return useQuery(query);
-};
 
 const ExampleTableView: React.FC = () => {
-  const tableName: string = "titanic_table";
-  const columns: string[] = getColumnsFromTableName(tableName);
-  
-  // const { loading, error, data } = fetchDataByColumns(columns);
+  const [data, setData] = useState<any>(null);
+  const [cols, setCols] = useState<string[]>([]);
 
-  // if (loading) {
-  //   return <div>Loading data...</div>;
-  // }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const tableName: string = "titanic_table";
+        const queryCols = `
+        query {
+          getTableColumns(tableName: "${tableName}")
+        }
+        `;
+        const url = "http://localhost:8000/graphql";
 
-  // if (error) {
-  //   return <div>Error loading data: {error.message}</div>;
-  // }
+        const resCol = await fetch(url, {
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: queryCols }),
+          method: "POST",
+        });
 
-  console.log(columns);
+        const jsonCol = await resCol.json();
+        setCols(jsonCol.data.getTableColumns.map(str => _.camelCase(str)))
+        console.log(jsonCol.data.getTableColumns);
+
+        const query = `
+        query {
+          getExampleRecords {
+            ${jsonCol.data.getTableColumns.map(str => _.camelCase(str)).join("\n")}
+          }
+        }
+        `;
+        console.log(query);
+
+        const res = await fetch(url, {
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query }),
+          method: "POST",
+        });
+
+        const json = await res.json();
+        setData(json.data);
+        console.log(json.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  });
+
+  // FIXME: filter process
+  // const [filter, setFilter] = useState<{ [key: string]: string }>({});
+
+  // const filteredRecords = data.getExampleRecords.filter((record: any) =>
+  //   cols.every((cols) => {
+  //     const recordValue = record[cols]?.toString() || "";
+  //     const filterValue = filter[cols] || "";
+  //     return recordValue.includes(filterValue);
+  //   })
+  // );
+
   return (
-    <div>{columns.length > 0 ? columns.join(", ") : "No columns available"}</div>
+    <div>
+      <h1>Table Data</h1>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+    </div>
   );
+
+  // return (
+  //   <Table2 numRows={data.getExampleRecords.length}>
+  //     {cols.map((column: string, index) => (
+  //       <Column
+  //         key={index}
+  //         name={column}
+  //         cellRenderer={(rowIndex) => (
+  //           <Cell>{data.getExampleRecords[rowIndex][column]}</Cell>
+  //         )}
+  //       />
+  //     ))}
+  //   </Table2>
+  // );   
+
+
+  
+
+  // FIXME: filter process
+  // return (
+  //   <Table2 numRows={filteredRecords.length}>
+  //     {cols.map((column: string, index) => (
+  //       <Column
+  //         key={index}
+  //         name={column}
+  //         columnHeaderCellRenderer={() => (
+  //           <ColumnHeaderCell name={column}>
+  //             <input
+  //               type="text"
+  //               value={filter[column] || ''}
+  //               onChange={(e) => setFilter({ ...filter, [column]: e.target.value })}
+  //               placeholder={`Filter ${column} `}
+  //             />
+  //           </ColumnHeaderCell>
+  //         )}
+  //         cellRenderer={(rowIndex) => (
+  //           <Cell>{filteredRecords[rowIndex][column]}</Cell>
+  //         )}
+  //       />
+  //     ))}
+  //   </Table2>
+  // );
 };
 
-
 const Tables: React.FC = () => {
+  // const [selectedTable, setSelectedTable] = useState<'testTable' | 'exampleTable'>('exampleTable');
   return (
-    <ApolloProvider client={client}>
-      <div className="App">
-        <h1 className="text-center text-xl font-bold mb-4">Blueprint.js Table Example</h1>
+    <div className="App">
+      <h1 className="text-center text-xl font-bold mb-4">Table Viewer</h1>
         <ExampleTableView />
-      </div>
-
-    </ApolloProvider >
+    </div>
   );
 }
 
