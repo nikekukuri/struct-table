@@ -55,7 +55,11 @@ const ExampleTableView: React.FC = () => {
     };
 
     fetchData();
-  });
+  }, []);
+  
+  if (!data) {
+    return <div>Loading...</div>; // データがロードされる前に「Loading」を表示
+  }
 
   // FIXME: filter process
   // const [filter, setFilter] = useState<{ [key: string]: string }>({});
@@ -68,26 +72,26 @@ const ExampleTableView: React.FC = () => {
   //   })
   // );
 
-  return (
-    <div>
-      <h1>Table Data</h1>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-    </div>
-  );
-
   // return (
-  //   <Table2 numRows={data.getExampleRecords.length}>
-  //     {cols.map((column: string, index) => (
-  //       <Column
-  //         key={index}
-  //         name={column}
-  //         cellRenderer={(rowIndex) => (
-  //           <Cell>{data.getExampleRecords[rowIndex][column]}</Cell>
-  //         )}
-  //       />
-  //     ))}
-  //   </Table2>
-  // );   
+  //   <div>
+  //     <h1>Table Data</h1>
+  //     <pre>{JSON.stringify(data, null, 2)}</pre>
+  //   </div>
+  // );
+
+  return (
+    <Table2 numRows={data.getExampleRecords.length}>
+      {cols.map((column: string, index) => (
+        <Column
+          key={index}
+          name={column}
+          cellRenderer={(rowIndex) => (
+            <Cell>{data.getExampleRecords[rowIndex][column]}</Cell>
+          )}
+        />
+      ))}
+    </Table2>
+  );   
 
 
   
