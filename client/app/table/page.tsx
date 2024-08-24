@@ -4,16 +4,20 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import _ from 'lodash';
 import { Cell, Column, ColumnHeaderCell, Table2 } from "@blueprintjs/table";
-import './style.css'
+import './style.css';
 
-const ExampleTableView: React.FC = () => {
+interface TableViewProps {
+  tableName: string;
+}
+
+const TableView: React.FC<TableViewProps> = ({ tableName }) => {
   const [data, setData] = useState<any>(null);
   const [cols, setCols] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const tableName: string = "titanic_table";
+        // const tableName: string = "titanic_table";
         const queryCols = `
         query {
           getTableColumns(tableName: "${tableName}")
@@ -72,13 +76,6 @@ const ExampleTableView: React.FC = () => {
   //   })
   // );
 
-  // return (
-  //   <div>
-  //     <h1>Table Data</h1>
-  //     <pre>{JSON.stringify(data, null, 2)}</pre>
-  //   </div>
-  // );
-
   return (
     <Table2 numRows={data.getExampleRecords.length}>
       {cols.map((column: string, index) => (
@@ -91,10 +88,7 @@ const ExampleTableView: React.FC = () => {
         />
       ))}
     </Table2>
-  );   
-
-
-  
+  );
 
   // FIXME: filter process
   // return (
@@ -127,7 +121,7 @@ const Tables: React.FC = () => {
   return (
     <div className="App">
       <h1 className="text-center text-xl font-bold mb-4">Table Viewer</h1>
-        <ExampleTableView />
+        <TableView tableName="titanic_table" />
     </div>
   );
 }
