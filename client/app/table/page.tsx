@@ -4,7 +4,9 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import _ from 'lodash';
 import { Cell, Column, ColumnHeaderCell, Table2 } from "@blueprintjs/table";
+
 import './style.css';
+import { AppNavBar } from "../components/AppNavbar";
 
 interface TableViewProps {
   tableName: string;
@@ -17,7 +19,6 @@ const TableView: React.FC<TableViewProps> = ({ tableName }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const tableName: string = "titanic_table";
         const queryCols = `
         query {
           getTableColumns(tableName: "${tableName}")
@@ -118,8 +119,10 @@ const TableView: React.FC<TableViewProps> = ({ tableName }) => {
 
 const Tables: React.FC = () => {
   // const [selectedTable, setSelectedTable] = useState<'testTable' | 'exampleTable'>('exampleTable');
+
   return (
     <div className="App">
+      <AppNavBar />
       <h1 className="text-center text-xl font-bold mb-4">Table Viewer</h1>
         <TableView tableName="titanic_table" />
     </div>
