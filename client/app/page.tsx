@@ -1,5 +1,10 @@
 import { VercelLogo } from "./components/logo";
-import { DocsLink, LearnLink, TemplatesLink, DeployLink } from "./components/links";
+import {
+  DocsLink,
+  LearnLink,
+  TemplatesLink,
+  DeployLink,
+} from "./components/links";
 
 export default function Home() {
   return (
@@ -12,7 +17,12 @@ export default function Home() {
         <VercelLogo />
       </div>
       <div>
-        <a href='/table' className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">table</a>
+        <a
+          href="/table"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          table
+        </a>
       </div>
       <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
         <div className="col-span-4 mb-4">

@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { useState, useEffect } from "react";
-import _ from 'lodash';
+import _ from "lodash";
 import { Cell, Column, ColumnHeaderCell, Table2 } from "@blueprintjs/table";
 
-import './style.css';
+import "./style.css";
 import { AppNavBar } from "../components/AppNavbar";
 
 interface TableViewProps {
@@ -33,13 +33,17 @@ const TableView: React.FC<TableViewProps> = ({ tableName }) => {
         });
 
         const jsonCol = await resCol.json();
-        setCols(jsonCol.data.getTableColumns.map(str => _.camelCase(str)))
+        setCols(
+          jsonCol.data.getTableColumns.map((str: string) => _.camelCase(str))
+        );
         console.log(jsonCol.data.getTableColumns);
 
         const query = `
         query {
           getExampleRecords {
-            ${jsonCol.data.getTableColumns.map(str => _.camelCase(str)).join("\n")}
+            ${jsonCol.data.getTableColumns
+              .map((str: string) => _.camelCase(str))
+              .join("\n")}
           }
         }
         `;
@@ -60,8 +64,8 @@ const TableView: React.FC<TableViewProps> = ({ tableName }) => {
     };
 
     fetchData();
-  }, []);
-  
+  }, [tableName]);
+
   if (!data) {
     return <div>Loading...</div>; // データがロードされる前に「Loading」を表示
   }
@@ -124,9 +128,9 @@ const Tables: React.FC = () => {
     <div className="App">
       <AppNavBar />
       <h1 className="text-center text-xl font-bold mb-4">Table Viewer</h1>
-        <TableView tableName="titanic_table" />
+      <TableView tableName="titanic_table" />
     </div>
   );
-}
+};
 
 export default Tables;
