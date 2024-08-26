@@ -67,7 +67,7 @@ const TableView: React.FC<TableViewProps> = ({ tableName }) => {
   }, [tableName]);
 
   if (!data) {
-    return <div>Loading...</div>; // データがロードされる前に「Loading」を表示
+    return <div>Loading...</div>;
   }
 
   // FIXME: filter process
