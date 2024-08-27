@@ -24,6 +24,14 @@ export default function Home() {
           table
         </a>
       </div>
+      <div>
+        <a
+          href="/graph"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          graph
+        </a>
+      </div>
       <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
         <div className="col-span-4 mb-4">
           <p className="w-full text-center">Next.js public Documents</p>

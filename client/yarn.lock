@@ -1349,6 +1349,25 @@
     "@swc/counter" "^0.1.3"
     tslib "^2.4.0"
 
+"@types/cytoscape-fcose@^2.2.4":
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/@types/cytoscape-fcose/-/cytoscape-fcose-2.2.4.tgz#8c7b4f0230146929dac33ba5f68cbfea4112c470"
+  integrity sha512-QwWtnT8HI9h+DHhG5krGc1ZY0Ex+cn85MvX96ZNAjSxuXiZDnjIZW/ypVkvvubTjIY4rSdkJY1D/Nsn8NDpmAw==
+  dependencies:
+    "@types/cytoscape" "*"
+
+"@types/cytoscape@*", "@types/cytoscape@^3.21.7":
+  version "3.21.7"
+  resolved "https://registry.yarnpkg.com/@types/cytoscape/-/cytoscape-3.21.7.tgz#8220e638624654e50bd0c3b464c01d0231331eb9"
+  integrity sha512-dP4UByJtfu5GjMJuv58yCIRxjCp4cP0Wp+Qd46L3Gom0hcV4OPmSOLqt83vArNcYRZLFCAyAk+lcC8oqQtcsqw==
+
+"@types/jquery@^3.5.30":
+  version "3.5.30"
+  resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.5.30.tgz#888d584cbf844d3df56834b69925085038fd80f7"
+  integrity sha512-nbWKkkyb919DOUxjmRVk8vwtDb0/k8FKncmUKFi+NY+QXqWltooxTrswvz4LspQwxvLdvzBN1TImr6cw3aQx2A==
+  dependencies:
+    "@types/sizzle" "*"
+
 "@types/js-yaml@^4.0.0":
   version "4.0.9"
   resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-4.0.9.tgz#cd82382c4f902fed9691a2ed79ec68c5898af4c2"
@@ -1383,6 +1402,14 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.12.tgz#12bb1e2be27293c1406acb6af1c3f3a1481d98c6"
   integrity sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==
 
+"@types/react-cytoscapejs@^1.2.5":
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@types/react-cytoscapejs/-/react-cytoscapejs-1.2.5.tgz#6648bbcc0f243b08b65a8753225b541068764653"
+  integrity sha512-G9VcGQOlER3njklOu5D0FDGHYfkQJ3yEL95kGbgI/MR08N5dQ7IbLSZI8WqaB4fG0zOURIg0BUtOCrbE5HRZEQ==
+  dependencies:
+    "@types/cytoscape" "*"
+    "@types/react" "*"
+
 "@types/react-dom@^18":
   version "18.3.0"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.3.0.tgz#0cbc818755d87066ab6ca74fbedb2547d74a82b0"
@@ -1404,6 +1431,11 @@
   dependencies:
     "@types/prop-types" "*"
     csstype "^3.0.2"
+
+"@types/sizzle@*":
+  version "2.3.8"
+  resolved "https://registry.yarnpkg.com/@types/sizzle/-/sizzle-2.3.8.tgz#518609aefb797da19bf222feb199e8f653ff7627"
+  integrity sha512-0vWLNK2D5MT9dg0iOo8GlKguPAU02QjmZitPEsXRuJXU/OGIOt9vT9Fc26wtYuavLxtO45v9PGleoL9Z0k1LHg==
 
 "@types/ws@^8.0.0":
   version "8.5.12"
@@ -1552,6 +1584,11 @@ acorn@^8.9.0:
   version "8.12.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.12.1.tgz#71616bdccbe25e27a54439e0046e89ca76df2248"
   integrity sha512-tcpGyI9zbizT9JbV6oYE477V6mTlXvvi0T0G3SNIYE2apm/G5huBa1+K89VGeovbg+jycCrfhl3ADxErOuO6Jg==
+
+add@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/add/-/add-2.0.6.tgz#248f0a9f6e5a528ef2295dbeec30532130ae2235"
+  integrity sha512-j5QzrmsokwWWp6kUcJQySpbG+xfOBqqKnup3OIk1pz+kB/80SLorZ9V8zHFLO92Lcd+hbvq8bT+zOGoPkmBV0Q==
 
 agent-base@^7.0.2, agent-base@^7.1.0:
   version "7.1.1"
@@ -2142,6 +2179,13 @@ convert-source-map@^2.0.0:
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-2.0.0.tgz#4b560f649fc4e918dd0ab75cf4961e8bc882d82a"
   integrity sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==
 
+cose-base@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/cose-base/-/cose-base-2.2.0.tgz#1c395c35b6e10bb83f9769ca8b817d614add5c01"
+  integrity sha512-AzlgcsCbUMymkADOJtQm3wO9S3ltPfYOFD5033keQn9NJzIbtnZj+UdBJe7DYml/8TdbtHJW3j58SOnKhWY/5g==
+  dependencies:
+    layout-base "^2.0.0"
+
 cosmiconfig@^8.1.0, cosmiconfig@^8.1.3:
   version "8.3.6"
   resolved "https://registry.yarnpkg.com/cosmiconfig/-/cosmiconfig-8.3.6.tgz#060a2b871d66dba6c8538ea1118ba1ac16f5fae3"
@@ -2184,6 +2228,25 @@ csstype@^3.0.2:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.3.tgz#d80ff294d114fb0e6ac500fbf85b60137d7eff81"
   integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
+
+cytoscape-fcose@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/cytoscape-fcose/-/cytoscape-fcose-2.2.0.tgz#e4d6f6490df4fab58ae9cea9e5c3ab8d7472f471"
+  integrity sha512-ki1/VuRIHFCzxWNrsshHYPs6L7TvLu3DL+TyIGEsRcvVERmxokbf5Gdk7mFxZnTdiGtnA4cfSmjZJMviqSuZrQ==
+  dependencies:
+    cose-base "^2.2.0"
+
+cytoscape-panzoom@^2.5.3:
+  version "2.5.3"
+  resolved "https://registry.yarnpkg.com/cytoscape-panzoom/-/cytoscape-panzoom-2.5.3.tgz#edf041b5aa8be1cbe3c001f16a8b2193b46127a7"
+  integrity sha512-//qLOqbbFUCGddarNKHDZArItOJHgnkQ1TvxI9nV2/8aOOl/5wuEOHmra3fL/aWSjB4AYpYTG4LX7w96uWfRTQ==
+  dependencies:
+    jquery "^1.4 || ^2.0 || ^3.0"
+
+cytoscape@^3.30.2:
+  version "3.30.2"
+  resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.30.2.tgz#94149707fb6547a55e3b44f03ffe232706212161"
+  integrity sha512-oICxQsjW8uSaRmn4UK/jkczKOqTrVqt5/1WL0POiJUT2EKNc9STM4hYFHv917yu55aTBMFNRzymlJhVAiWPCxw==
 
 damerau-levenshtein@^1.0.8:
   version "1.0.8"
@@ -3602,6 +3665,11 @@ jose@^5.0.0:
   resolved "https://registry.yarnpkg.com/jose/-/jose-5.6.3.tgz#415688bc84875461c86dfe271ea6029112a23e27"
   integrity sha512-1Jh//hEEwMhNYPDDLwXHa2ePWgWiFNNUadVmguAAw2IJ6sj9mNxV5tGXJNqlMkJAybF6Lgw1mISDxTePP/187g==
 
+"jquery@^1.4 || ^2.0 || ^3.0", jquery@^3.7.1:
+  version "3.7.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.7.1.tgz#083ef98927c9a6a74d05a6af02806566d16274de"
+  integrity sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==
+
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -3687,6 +3755,11 @@ language-tags@^1.0.9:
   integrity sha512-MbjN408fEndfiQXbFQ1vnd+1NoLDsnQW41410oQBXiyXDMYH5z505juWa4KUE1LqxRC7DgOgZDbKLxHIwm27hA==
   dependencies:
     language-subtag-registry "^0.3.20"
+
+layout-base@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/layout-base/-/layout-base-2.0.1.tgz#d0337913586c90f9c2c075292069f5c2da5dd285"
+  integrity sha512-dp3s92+uNI1hWIpPGH3jK2kxE2lMjdXdr+DH8ynZHpd6PUlH6x6cbuXnoMmiNumznqaNO31xu9e79F0uuZ0JFg==
 
 levn@^0.4.1:
   version "0.4.1"
@@ -4385,6 +4458,13 @@ queue-microtask@^1.2.2:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
+
+react-cytoscapejs@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/react-cytoscapejs/-/react-cytoscapejs-2.0.0.tgz#fdc2547626df0678acfbb48e73a437ddc1687b01"
+  integrity sha512-t3SSl1DQy7+JQjN+8QHi1anEJlM3i3aAeydHTsJwmjo/isyKK7Rs7oCvU6kZsB9NwZidzZQR21Vm2PcBLG/Tjg==
+  dependencies:
+    prop-types "^15.8.1"
 
 react-dom@^18:
   version "18.3.1"
@@ -5472,6 +5552,11 @@ yargs@^17.0.0:
     string-width "^4.2.3"
     y18n "^5.0.5"
     yargs-parser "^21.1.1"
+
+yarn@^1.22.22:
+  version "1.22.22"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.22.22.tgz#ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+  integrity sha512-prL3kGtyG7o9Z9Sv8IPfBNrWTDmXB4Qbes8A9rEzt6wkJV8mUvoirjU0Mp3GGAU06Y0XQyA3/2/RQFVuK7MTfg==
 
 yocto-queue@^0.1.0:
   version "0.1.0"
