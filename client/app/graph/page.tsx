@@ -1,12 +1,194 @@
 "use client";
 
 import CytoscapeComponent from "react-cytoscapejs";
-import { calcExpression } from "./calc";
 import { useState } from "react";
 import { Button } from "@blueprintjs/core";
+import { extractDependencies } from "./parse";
+import { evaluate } from "mathjs";
+
+// Why not Node.dependencies is not Node[]? => It is not a good for future extension if occures closed loop.
+export interface NodeCache {
+  id: string;
+  name: string;
+  view_name: string;
+  expression: string;
+  unit: string;
+  status: string;
+  current_value?: number;
+  init_value: number;
+  expected: number;
+  dependencies: Dependency[];
+  description: string;
+  is_visited: boolean;
+}
+
+export interface Dependency {
+  id: string;
+  name: string;
+  value?: number;
+}
+
+export interface Node {
+  group: "nodes";
+  data: Data;
+  position?: { x: number; y: number };
+}
+
+export interface Edge {
+  group: "edges";
+  data: Data;
+}
+
+export interface Data {
+  id: string;
+  label?: string;
+  info?: string;
+  source?: string;
+  target?: string;
+}
+
+const createEdge = (node: NodeCache): Edge[] => {
+  const edges: Edge[] = [];
+  for (const dependency of node.dependencies) {
+    const edge: Edge = {
+      group: "edges",
+      data: {
+        id: `${node.name}-${dependency.name}`,
+        source: node.id,
+        target: dependency.id,
+      },
+    };
+    edges.push(edge);
+  }
+  return edges;
+};
+
+// TODO: error handling
+const calculateExpression = (node: NodeCache): number => {
+  let exp = node.expression;
+  for (const dependency of node.dependencies) {
+    if (dependency.value !== undefined) {
+      exp = exp.replace(dependency.name, dependency.value.toString());
+    }
+  }
+  return evaluate(exp);
+};
+
+const formatNodefromCache = (node: NodeCache): Node => {
+  const newNode: Node = {
+    group: "nodes",
+    data: {
+      id: node.id,
+      label: node.name,
+      info: `Expression: ${node.expression}\nExpected: ${node.expected}`,
+    },
+    position: { x: 100, y: 100 },
+  };
+  return newNode;
+};
+
+const EXAMPLE_DATA: NodeCache[] = [
+  {
+    id: "0",
+    name: "result",
+    view_name: "View 0",
+    expression: "a + b",
+    unit: "-",
+    status: "calc",
+    init_value: 0,
+    expected: 3,
+    dependencies: [],
+    description: "",
+    is_visited: false,
+  },
+  {
+    id: "1",
+    name: "a",
+    view_name: "View a",
+    expression: "c + d",
+    unit: "-",
+    status: "calc",
+    init_value: 1,
+    expected: 1,
+    dependencies: [],
+    description: "",
+    is_visited: false,
+  },
+  {
+    id: "2",
+    name: "b",
+    view_name: "View b",
+    expression: "",
+    unit: "-",
+    status: "calc",
+    init_value: 2,
+    expected: 2,
+    dependencies: [],
+    description: "",
+    is_visited: false,
+  },
+  {
+    id: "3",
+    name: "c",
+    view_name: "View c",
+    expression: "",
+    unit: "-",
+    status: "input",
+    init_value: 3,
+    expected: 3,
+    dependencies: [],
+    description: "",
+    is_visited: false,
+  },
+  {
+    id: "4",
+    name: "d",
+    view_name: "View d",
+    expression: "",
+    unit: "-",
+    status: "input",
+    init_value: 4,
+    expected: 4,
+    dependencies: [],
+    description: "",
+    is_visited: false,
+  },
+];
 
 const Graph: React.FC = () => {
   const [selectedNode, setSelectedTable] = useState(null);
+
+  // Make tree construction from the nodes.
+  const exampleNodes: NodeCache[] = EXAMPLE_DATA;
+  const addedDependenciesNodes = [];
+  // TODO: three times loop is not good.
+  for (const node of exampleNodes) {
+    const dependencies: Dependency[] = [];
+    const dependencyNames: string[] = extractDependencies(node);
+    for (const dependencyName of dependencyNames) {
+      for (const tmpNode of exampleNodes) {
+        if (tmpNode.name === dependencyName) {
+          dependencies.push({ id: tmpNode.id, name: tmpNode.name });
+        }
+      }
+    }
+
+    addedDependenciesNodes.push({
+      ...node,
+      dependencies: dependencies,
+    });
+  }
+  console.log(addedDependenciesNodes);
+
+  // Create edge from dependencies.
+  const edges: Edge[] = [];
+  for (const node of addedDependenciesNodes) {
+    const edges_tmp = createEdge(node);
+    for (const edge of edges_tmp) {
+      edges.push(edge);
+    }
+  }
+  console.log(edges);
 
   const handleNodeSelection = (e: any) => {
     const node = e.target;
@@ -27,21 +209,20 @@ const Graph: React.FC = () => {
     }
   };
 
-  const exp = "1 + 2 + 3";
-  const result = calcExpression(exp);
-  const elements = [
-    {
-      data: { id: "one", label: "Node 1", info: "info1" },
-      position: { x: 100, y: 100 },
-    },
-    {
-      data: { id: "two", label: "Node 2", info: "info2" },
-      position: { x: 200, y: 200 },
-    },
-    {
-      data: { source: "one", target: "two", label: "Edge from Node1 to Node2" },
-    },
-  ];
+  // TODO: startNode should be found by the status.
+
+  const nodes: Node[] = [];
+  for (const node of addedDependenciesNodes) {
+    nodes.push(formatNodefromCache(node));
+  }
+
+  const elements = [];
+  for (const node of nodes) {
+    elements.push(node);
+  }
+  for (const edge of edges) {
+    elements.push(edge);
+  }
 
   const style = [
     {
@@ -73,7 +254,6 @@ const Graph: React.FC = () => {
 
   return (
     <>
-      <div className="align-center">result = {result}</div>
       <div style={{ width: "500px", height: "500px" }}>
         <h1>GraphView</h1>
         <CytoscapeComponent

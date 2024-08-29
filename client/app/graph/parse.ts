@@ -1,38 +1,14 @@
-import { fetchVariableData } from "./fetch";
+import { tokenize, Token, TokenType } from "./tokenize";
+import { NodeCache } from "./page";
 
-const isNumeric = (str: string): boolean => {
-  const numericRegex = /^[+-]?\d+(\.\d+)?$/;
-  return numericRegex.test(str);
-};
-
-const isReservedName = (token: string): boolean => {
-  if (isNumeric(token)) {
-    return true;
-  }
-
-  const reservedTokens: string[] = ["+", "-", "*", "/", "^"];
-
-  for (const rt of reservedTokens) {
-    if (token === rt) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-export const parseExpression = (exp: string): string => {
-  // const exp = "1 + 2 * 3 ^ 3 * RN";
-  const tableName = "titanic";
-  const tokens = exp.split(" ");
-  let newExp = exp;
-
+export const extractDependencies = (node: NodeCache): string[] => {
+  const tokens: Token[] = tokenize(node.expression);
+  const dependencies: string[] = [];
   for (const token of tokens) {
-    if (!isReservedName(token)) {
-      let valName = token;
-      let valValue = fetchVariableData(token, tableName);
-      newExp = newExp.replace(valName, valValue);
+    if (token.type === TokenType.Variable) {
+      dependencies.push(token.value);
     }
   }
-  return newExp;
+
+  return dependencies;
 };
