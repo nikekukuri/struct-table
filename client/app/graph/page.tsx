@@ -3,7 +3,7 @@
 import CytoscapeComponent from "react-cytoscapejs";
 import { useState } from "react";
 import { Button } from "@blueprintjs/core";
-import { extractDependencies } from "./parse";
+import { addDependencies, extractDependencyNames } from "./parse";
 import { evaluate } from "mathjs";
 
 // Why not Node.dependencies is not Node[]? => It is not a good for future extension if occures closed loop.
@@ -17,15 +17,10 @@ export interface NodeCache {
   current_value?: number;
   init_value: number;
   expected: number;
-  dependencies: Dependency[];
+  dependencies: NodeCache[];
+  dependencyNames: string[];
   description: string;
   is_visited: boolean;
-}
-
-export interface Dependency {
-  id: string;
-  name: string;
-  value?: number;
 }
 
 export interface Node {
@@ -98,6 +93,7 @@ const EXAMPLE_DATA: NodeCache[] = [
     init_value: 0,
     expected: 3,
     dependencies: [],
+    dependencyNames: [],
     description: "",
     is_visited: false,
   },
@@ -111,6 +107,7 @@ const EXAMPLE_DATA: NodeCache[] = [
     init_value: 1,
     expected: 1,
     dependencies: [],
+    dependencyNames: [],
     description: "",
     is_visited: false,
   },
@@ -124,6 +121,7 @@ const EXAMPLE_DATA: NodeCache[] = [
     init_value: 2,
     expected: 2,
     dependencies: [],
+    dependencyNames: [],
     description: "",
     is_visited: false,
   },
@@ -137,6 +135,7 @@ const EXAMPLE_DATA: NodeCache[] = [
     init_value: 3,
     expected: 3,
     dependencies: [],
+    dependencyNames: [],
     description: "",
     is_visited: false,
   },
@@ -150,34 +149,46 @@ const EXAMPLE_DATA: NodeCache[] = [
     init_value: 4,
     expected: 4,
     dependencies: [],
+    dependencyNames: [],
     description: "",
     is_visited: false,
   },
 ];
+
+// const makeNodeTree = (nodes: NodeCache[]): NodeCache => {
+//   let targetNode = nodes[0];
+//   for (const node of nodes) {
+//     if (node.dependencies.length === 0) {
+//       continue;
+//     }
+//     for (const dependency of node.dependencies) {
+//       if (dependency.is_visited) {
+//         continue;
+//       }
+//       dependency.is_visited = true;
+//       targetNode = dependency;
+//     }
+//   }
+//   return
+// }
 
 const Graph: React.FC = () => {
   const [selectedNode, setSelectedTable] = useState(null);
 
   // Make tree construction from the nodes.
   const exampleNodes: NodeCache[] = EXAMPLE_DATA;
-  const addedDependenciesNodes = [];
-  // TODO: three times loop is not good.
-  for (const node of exampleNodes) {
-    const dependencies: Dependency[] = [];
-    const dependencyNames: string[] = extractDependencies(node);
-    for (const dependencyName of dependencyNames) {
-      for (const tmpNode of exampleNodes) {
-        if (tmpNode.name === dependencyName) {
-          dependencies.push({ id: tmpNode.id, name: tmpNode.name });
-        }
-      }
-    }
 
-    addedDependenciesNodes.push({
-      ...node,
-      dependencies: dependencies,
-    });
+  const addedDependencyNamesNodes: NodeCache[] = [];
+  for (const node of exampleNodes) {
+    const dependencyNames: string[] = extractDependencyNames(node);
+    const newNode = { ...node, dependencyNames: dependencyNames };
+    addedDependencyNamesNodes.push(newNode);
   }
+  console.log(addedDependencyNamesNodes);
+
+  const addedDependenciesNodes: NodeCache[] = addDependencies(
+    addedDependencyNamesNodes
+  );
   console.log(addedDependenciesNodes);
 
   // Create edge from dependencies.
@@ -208,8 +219,6 @@ const Graph: React.FC = () => {
       alert("No node selected");
     }
   };
-
-  // TODO: startNode should be found by the status.
 
   const nodes: Node[] = [];
   for (const node of addedDependenciesNodes) {

@@ -1,7 +1,7 @@
 import { tokenize, Token, TokenType } from "./tokenize";
 import { NodeCache } from "./page";
 
-export const extractDependencies = (node: NodeCache): string[] => {
+export const extractDependencyNames = (node: NodeCache): string[] => {
   const tokens: Token[] = tokenize(node.expression);
   const dependencies: string[] = [];
   for (const token of tokens) {
@@ -11,4 +11,20 @@ export const extractDependencies = (node: NodeCache): string[] => {
   }
 
   return dependencies;
+};
+
+export const addDependencies = (nodes: NodeCache[]): NodeCache[] => {
+  const newNodes: NodeCache[] = [];
+  for (const node of nodes) {
+    const dependencyNodes: NodeCache[] = [];
+    for (const dependencyName of node.dependencyNames) {
+      const dependencyNode = nodes.find((n) => n.name === dependencyName);
+      if (dependencyNode) {
+        dependencyNodes.push(dependencyNode);
+      }
+    }
+    newNodes.push({ ...node, dependencies: dependencyNodes });
+  }
+
+  return newNodes;
 };
