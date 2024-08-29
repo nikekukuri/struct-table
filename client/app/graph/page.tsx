@@ -3,7 +3,11 @@
 import CytoscapeComponent from "react-cytoscapejs";
 import { useState } from "react";
 import { Button } from "@blueprintjs/core";
-import { addDependencies, extractDependencyNames } from "./parse";
+import {
+  addDependencies,
+  extractDependencyNames,
+  makeNodeGraph,
+} from "./parse";
 import { evaluate } from "mathjs";
 
 // Why not Node.dependencies is not Node[]? => It is not a good for future extension if occures closed loop.
@@ -155,23 +159,6 @@ const EXAMPLE_DATA: NodeCache[] = [
   },
 ];
 
-// const makeNodeTree = (nodes: NodeCache[]): NodeCache => {
-//   let targetNode = nodes[0];
-//   for (const node of nodes) {
-//     if (node.dependencies.length === 0) {
-//       continue;
-//     }
-//     for (const dependency of node.dependencies) {
-//       if (dependency.is_visited) {
-//         continue;
-//       }
-//       dependency.is_visited = true;
-//       targetNode = dependency;
-//     }
-//   }
-//   return
-// }
-
 const Graph: React.FC = () => {
   const [selectedNode, setSelectedTable] = useState(null);
 
@@ -184,14 +171,11 @@ const Graph: React.FC = () => {
     const newNode = { ...node, dependencyNames: dependencyNames };
     addedDependencyNamesNodes.push(newNode);
   }
-  console.log(addedDependencyNamesNodes);
 
   const addedDependenciesNodes: NodeCache[] = addDependencies(
     addedDependencyNamesNodes
   );
-  console.log(addedDependenciesNodes);
 
-  // Create edge from dependencies.
   const edges: Edge[] = [];
   for (const node of addedDependenciesNodes) {
     const edges_tmp = createEdge(node);
@@ -199,7 +183,14 @@ const Graph: React.FC = () => {
       edges.push(edge);
     }
   }
-  console.log(edges);
+
+  // TODO: targetNode should be selected by user.
+  const targetNode = addedDependenciesNodes[0];
+  const treeNodes: NodeCache = makeNodeGraph(
+    targetNode,
+    addedDependenciesNodes
+  );
+  console.log(treeNodes);
 
   const handleNodeSelection = (e: any) => {
     const node = e.target;

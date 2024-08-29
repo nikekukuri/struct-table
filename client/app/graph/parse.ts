@@ -28,3 +28,27 @@ export const addDependencies = (nodes: NodeCache[]): NodeCache[] => {
 
   return newNodes;
 };
+
+export const makeNodeGraph = (
+  targetNode: NodeCache,
+  nodes: NodeCache[]
+): NodeCache => {
+  const newNode = { ...targetNode };
+  const depsNodes: NodeCache[] = [];
+
+  if (
+    targetNode.dependencyNames.length !== 0 &&
+    targetNode.is_visited === false
+  ) {
+    for (const name of targetNode.dependencyNames) {
+      const dependencyNode = nodes.find((n) => n.name === name);
+      if (dependencyNode) {
+        const tmpNode = makeNodeGraph(dependencyNode, nodes);
+        depsNodes.push(tmpNode);
+      }
+    }
+  }
+  newNode.dependencies = depsNodes;
+  newNode.is_visited = true;
+  return newNode;
+};
