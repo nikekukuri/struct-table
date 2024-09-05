@@ -8,7 +8,7 @@ import {
   extractDependencyNames,
   makeNodeGraph,
 } from "./parse";
-import { evaluate } from "mathjs";
+import { calculateGraph } from "./calc";
 
 // Why not Node.dependencies is not Node[]? => It is not a good for future extension if occures closed loop.
 export interface NodeCache {
@@ -62,23 +62,13 @@ const createEdge = (node: NodeCache): Edge[] => {
   return edges;
 };
 
-// TODO: error handling
-const calculateExpression = (node: NodeCache): number => {
-  let exp = node.expression;
-  for (const dependency of node.dependencies) {
-    if (dependency.value !== undefined) {
-      exp = exp.replace(dependency.name, dependency.value.toString());
-    }
-  }
-  return evaluate(exp);
-};
-
 const formatNodefromCache = (node: NodeCache): Node => {
+  const label = `${node.name}\n \n${node.expression} = ${node.current_value} \n${node.expected}`;
   const newNode: Node = {
     group: "nodes",
     data: {
       id: node.id,
-      label: node.name,
+      label: label,
       info: `Expression: ${node.expression}\nExpected: ${node.expected}`,
     },
     position: { x: 100, y: 100 },
@@ -86,16 +76,32 @@ const formatNodefromCache = (node: NodeCache): Node => {
   return newNode;
 };
 
+const formatNodefromCacheTree = (node: NodeCache): Node[] => {
+  let serialNode: Node[] = [];
+  serialNode.push(formatNodefromCache(node));
+  for (const dependency of node.dependencies) {
+    if (dependency.dependencies.length === 0) {
+      const tmpNode = formatNodefromCache(dependency);
+      serialNode.push(tmpNode);
+    } else {
+      const tmpNodes = formatNodefromCacheTree(dependency);
+      serialNode = [...serialNode, ...tmpNodes];
+    }
+  }
+
+  return serialNode;
+};
+
 const EXAMPLE_DATA: NodeCache[] = [
   {
     id: "0",
     name: "result",
-    view_name: "View 0",
+    view_name: "Top Node",
     expression: "a + b",
     unit: "-",
     status: "calc",
     init_value: 0,
-    expected: 3,
+    expected: 9,
     dependencies: [],
     dependencyNames: [],
     description: "",
@@ -109,7 +115,7 @@ const EXAMPLE_DATA: NodeCache[] = [
     unit: "-",
     status: "calc",
     init_value: 1,
-    expected: 1,
+    expected: 7,
     dependencies: [],
     dependencyNames: [],
     description: "",
@@ -173,7 +179,7 @@ const Graph: React.FC = () => {
   }
 
   const addedDependenciesNodes: NodeCache[] = addDependencies(
-    addedDependencyNamesNodes
+    addedDependencyNamesNodes,
   );
 
   const edges: Edge[] = [];
@@ -186,11 +192,16 @@ const Graph: React.FC = () => {
 
   // TODO: targetNode should be selected by user.
   const targetNode = addedDependenciesNodes[0];
-  const treeNodes: NodeCache = makeNodeGraph(
+  const graphNodes: NodeCache = makeNodeGraph(
     targetNode,
-    addedDependenciesNodes
+    addedDependenciesNodes,
   );
-  console.log(treeNodes);
+  console.log("---graphNodes---");
+  console.log(graphNodes);
+
+  const calculateadNode = calculateGraph(graphNodes);
+  console.log("---calculateadNodes---");
+  console.log(calculateadNode);
 
   const handleNodeSelection = (e: any) => {
     const node = e.target;
@@ -215,9 +226,22 @@ const Graph: React.FC = () => {
   for (const node of addedDependenciesNodes) {
     nodes.push(formatNodefromCache(node));
   }
+  console.log("---serialNodes---");
+  console.log(nodes);
+
+  const nodesFromGraph: Node[] = formatNodefromCacheTree(calculateadNode);
+  console.log("---nodesFromGraph---");
+  console.log(nodesFromGraph);
 
   const elements = [];
-  for (const node of nodes) {
+  // for (const node of nodes) {
+  //   elements.push(node);
+  // }
+  // for (const edge of edges) {
+  //   elements.push(edge);
+  // }
+
+  for (const node of nodesFromGraph) {
     elements.push(node);
   }
   for (const edge of edges) {
