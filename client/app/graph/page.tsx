@@ -2,13 +2,14 @@
 
 import CytoscapeComponent from "react-cytoscapejs";
 import { useState } from "react";
-import { Button } from "@blueprintjs/core";
+import { Button, InputGroup } from "@blueprintjs/core";
 import {
   addDependencies,
   extractDependencyNames,
   makeNodeGraph,
 } from "./parse";
 import { calculateGraph } from "./calc";
+import { FormGroup } from "@blueprintjs/core";
 
 // Why not Node.dependencies is not Node[]? => It is not a good for future extension if occures closed loop.
 export interface NodeCache {
@@ -31,6 +32,16 @@ export interface Node {
   group: "nodes";
   data: Data;
   position?: { x: number; y: number };
+  additional?: Additional;
+}
+
+interface Additional {
+  expression: string;
+  value: number;
+  name: string;
+  viewName: string;
+  dependencyNames: string[];
+  unit: string;
 }
 
 export interface Edge {
@@ -70,6 +81,13 @@ const formatNodefromCache = (node: NodeCache): Node => {
       id: node.id,
       label: label,
       info: `Expression: ${node.expression}\nExpected: ${node.expected}`,
+      additional: {
+        expression: node.expression,
+        value: node.current_value ? node.current_value : node.init_value,
+        viewName: node.view_name,
+        dependencyNames: node.dependencyNames,
+        unit: node.unit,
+      },
     },
     position: { x: 100, y: 100 },
   };
@@ -90,6 +108,10 @@ const formatNodefromCacheTree = (node: NodeCache): Node[] => {
   }
 
   return serialNode;
+};
+
+const searchTargetNode = (node: NodeCache): NodeCache | null => {
+  return node;
 };
 
 const EXAMPLE_DATA: NodeCache[] = [
@@ -166,7 +188,18 @@ const EXAMPLE_DATA: NodeCache[] = [
 ];
 
 const Graph: React.FC = () => {
-  const [selectedNode, setSelectedTable] = useState(null);
+  const [name, setName] = useState("");
+  const [viewName, setViewName] = useState("");
+  const [value, setValue] = useState("");
+  const [expression, setExpression] = useState("");
+
+  const handleNodeSelection = (e: any) => {
+    const node = e.target;
+    setName(node.data.id);
+    setViewName(node.data("additional").viewName);
+    setValue(node.data("additional").value);
+    setExpression(node.data("additional").expression);
+  };
 
   // Make tree construction from the nodes.
   const exampleNodes: NodeCache[] = EXAMPLE_DATA;
@@ -203,43 +236,26 @@ const Graph: React.FC = () => {
   console.log("---calculateadNodes---");
   console.log(calculateadNode);
 
-  const handleNodeSelection = (e: any) => {
-    const node = e.target;
-    setSelectedTable({
-      id: node.id(),
-      label: node.data("label"),
-      info: node.data("info"),
-    });
-  };
-
-  const handleEditButtonClick = () => {
-    if (selectedNode) {
-      // Navigate to the edit screen (implement according to your routing/navigation setup)
-      console.log("Navigating to edit screen for:", selectedNode);
-      // Example: navigate(`/edit/${selectedNode.id}`, { state: { nodeData: selectedNode } });
+  const handleUpdateButtonClick = () => {
+    const node = searchTargetNode();
+    if (false) {
     } else {
       alert("No node selected");
     }
   };
 
-  const nodes: Node[] = [];
-  for (const node of addedDependenciesNodes) {
-    nodes.push(formatNodefromCache(node));
-  }
-  console.log("---serialNodes---");
-  console.log(nodes);
+  // const nodes: Node[] = [];
+  // for (const node of addedDependenciesNodes) {
+  //   nodes.push(formatNodefromCache(node));
+  // }
+  // console.log("---serialNodes---");
+  // console.log(nodes);
 
   const nodesFromGraph: Node[] = formatNodefromCacheTree(calculateadNode);
   console.log("---nodesFromGraph---");
   console.log(nodesFromGraph);
 
   const elements = [];
-  // for (const node of nodes) {
-  //   elements.push(node);
-  // }
-  // for (const edge of edges) {
-  //   elements.push(edge);
-  // }
 
   for (const node of nodesFromGraph) {
     elements.push(node);
@@ -274,27 +290,68 @@ const Graph: React.FC = () => {
         "target-arrow-shape": "triangle",
       },
     },
+    {
+      selector: "node:selected",
+      style: {
+        "border-width": "4px",
+        "border-color": "#FF5733",
+        "background-color": "#FFB6C1",
+        "text-outline-color": "#FF5733",
+      },
+    },
   ];
 
   return (
     <>
-      <div style={{ width: "500px", height: "500px" }}>
+      <div style={{ width: "2000px", height: "600px" }}>
         <h1>GraphView</h1>
         <CytoscapeComponent
           elements={elements}
-          style={{ width: "600px", height: "600px" }}
+          style={{ width: "2000px", height: "600px" }}
           cy={(cy) => {
             cy.on("select", "node", handleNodeSelection);
           }}
           stylesheet={style}
         />
-        <Button
-          intent="success"
-          onClick={handleEditButtonClick}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Edit
-        </Button>
+        <div className="items-center justify-center min-h-screen">
+          <FormGroup className="p-8 by-gray-100 rounded-md">
+            <div className="mb-4">
+              <label>name</label>
+              <InputGroup
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              ></InputGroup>
+            </div>
+            <div className="mb-4">
+              <label>view name</label>
+              <InputGroup
+                value={viewName}
+                onChange={(e) => setViewName(e.target.value)}
+              ></InputGroup>
+            </div>
+            <div className="mb-4">
+              <label>value</label>
+              <InputGroup
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+              ></InputGroup>
+            </div>
+            <div className="mb-4">
+              <label>expression</label>
+              <InputGroup
+                value={expression}
+                onChange={(e) => setExpression(e.target.value)}
+              ></InputGroup>
+            </div>
+            <Button
+              intent="success"
+              onClick={handleUpdateButtonClick}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Edit
+            </Button>
+          </FormGroup>
+        </div>
       </div>
     </>
   );
