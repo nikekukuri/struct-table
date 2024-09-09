@@ -202,7 +202,7 @@ const Graph: React.FC = () => {
   };
 
   // Make tree construction from the nodes.
-  const exampleNodes: NodeCache[] = EXAMPLE_DATA;
+  let exampleNodes: NodeCache[] = EXAMPLE_DATA;
 
   const addedDependencyNamesNodes: NodeCache[] = [];
   for (const node of exampleNodes) {
