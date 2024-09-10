@@ -199,7 +199,7 @@ const serializeNode = (node: Node): Node[] => {
   const deps = node.data.info?.dependencies;
   const serialNodes: Node[] = [];
   if (deps?.length !== 0) {
-    for(const dep of deps) {
+    for (const dep of deps) {
       const tmpNode = serializeNode(dep);
       serialNodes.push(...tmpNode);
     }
@@ -220,7 +220,7 @@ const addPosition = (node: Node): Node => {
 };
 
 const addLabel = (node: Node): Node => {
-  const lable = `${node.data.info.name}\n${node.data.info.viewName}\n${node.data.info.expression} = ${node.data.info.currentValue} ${node.data.info.unit}\nexpected: ${node.data.info?.expected} ${node.data.info.unit}`
+  const lable = `${node.data.info.name}\n${node.data.info.viewName}\n${node.data.info.expression} = ${node.data.info.currentValue} ${node.data.info.unit}\nexpected: ${node.data.info?.expected} ${node.data.info.unit}`;
   return {
     ...node,
     data: {
@@ -234,7 +234,7 @@ const createElements = (nodes: Node[]) => {
   const addedDependencyNamesNodes: Node[] = [];
   for (const node of nodes) {
     const dependencyNames: string[] = extractDependencyNames(node);
-    const newNode: Node = { 
+    const newNode: Node = {
       ...node,
       data: {
         ...node.data,
@@ -254,10 +254,7 @@ const createElements = (nodes: Node[]) => {
 
   // TODO: targetNode should be selected by user.
   const targetNode = addedDependenciesNodes[0];
-  const graphNodes: Node = makeNodeGraph(
-    targetNode,
-    addedDependenciesNodes,
-  );
+  const graphNodes: Node = makeNodeGraph(targetNode, addedDependenciesNodes);
 
   const calculatedNodes = calculateGraph(graphNodes);
   const serialNodes = serializeNode(calculatedNodes);
@@ -302,14 +299,12 @@ const Graph: React.FC = () => {
     setDesc(selectedNode.info.description);
   };
 
-  // let exampleNodesData: Data[] = EXAMPLE_DATA;
-  // let nodesData = exampleNodesData;
   const nodes: Node[] = [];
   for (const data of nodesData) {
     const node: Node = {
       group: "nodes",
       data: data,
-    }
+    };
     nodes.push(node);
   }
 
@@ -320,20 +315,22 @@ const Graph: React.FC = () => {
       const node: Node = {
         group: "nodes",
         data: data,
-      }
+      };
       nodes.push(node);
     }
 
     const elements = createElements(nodes);
     setElements(elements);
-  }
+  };
 
   useEffect(elementFromNode, []);
   useEffect(elementFromNode, [nodesData]);
 
   const handleEditNodeButtonClick = () => {
     const targetName = name;
-    const targetNodeIdx = nodesData.findIndex((data) => data.info.name === targetName);
+    const targetNodeIdx = nodesData.findIndex(
+      (data) => data.info.name === targetName,
+    );
 
     if (targetNodeIdx !== -1) {
       const updatedNodesData = [...nodesData];
@@ -349,7 +346,6 @@ const Graph: React.FC = () => {
   };
 
   const handleAddNodeButtonClick = () => {};
-
 
   return (
     <>
