@@ -1,58 +1,58 @@
 import { evaluate } from "mathjs";
-import { NodeCache } from "./page";
+import { Node } from "./page";
 
-export const calculateGraph = (node: NodeCache): NodeCache => {
-  const filledEdgesNode: NodeCache = fillInitialValueOnEdges(node);
+export const calculateGraph = (node: Node): Node => {
+  const filledEdgesNode: Node = fillInitialValueOnEdges(node);
   // console.log("---filledEdgesNode---");
   // console.log(filledEdgesNode);
   const calculatedNode = calculateRecursive(filledEdgesNode);
-  calculatedNode.currentValue = calculateExpression(calculatedNode);
+  calculatedNode.data.info.currentValue = calculateExpression(calculatedNode);
   return calculatedNode;
 };
 
-export const calculateRecursive = (node: NodeCache): NodeCache => {
+export const calculateRecursive = (node: Node): Node => {
   // console.log("----calculateRecursive----");
   // console.log(node);
   const calculatedNode = { ...node };
   const dependencyNodes = [];
-  for (const dependency of node.dependencies) {
+  for (const dependency of node.data.info.dependencies) {
     if (!isAllDependenciesCalculated(dependency)) {
       // Recursive process
-      console.log(`Recursive process: ${dependency.name}`);
+      console.log(`Recursive process: ${dependency.data.info?.name}`);
       const tmpNode = calculateRecursive(dependency);
       dependencyNodes.push(tmpNode);
-    } else if (dependency.currentValue === undefined) {
+    } else if (dependency.data.info?.currentValue === undefined) {
       // Calculate current value
-      dependency.currentValue = calculateExpression(dependency);
+      dependency.data.info.currentValue = calculateExpression(dependency);
     }
     dependencyNodes.push(dependency);
   }
-  calculatedNode.dependencies = dependencyNodes;
+  calculatedNode.data.info.dependencies = dependencyNodes;
   return calculatedNode;
 };
 
-const isAllDependenciesCalculated = (node: NodeCache): boolean => {
-  for (const dependency of node.dependencies) {
-    if (dependency.currentValue === undefined) {
+const isAllDependenciesCalculated = (node: Node): boolean => {
+  for (const dependency of node.data.info.dependencies) {
+    if (dependency.data.info?.currentValue === undefined) {
       return false;
     }
   }
   return true;
 };
 
-const isEdgeNode = (node: NodeCache): boolean => {
-  if (node.dependencies.length === 0) {
+const isEdgeNode = (node: Node): boolean => {
+  if (node.data.info?.dependencies.length === 0) {
     return true;
   }
   return false;
 };
 
-const fillInitialValueOnEdges = (node: NodeCache): NodeCache => {
+const fillInitialValueOnEdges = (node: Node): Node => {
   const newNode = { ...node };
   const dependencyNodes = [];
-  for (const dependency of node.dependencies) {
+  for (const dependency of node.data.info?.dependencies) {
     if (isEdgeNode(dependency)) {
-      dependency.currentValue = dependency.initValue;
+      dependency.data.info.currentValue = dependency.data.info?.initValue;
       dependencyNodes.push(dependency);
     } else {
       // Recursive process
@@ -60,15 +60,18 @@ const fillInitialValueOnEdges = (node: NodeCache): NodeCache => {
       dependencyNodes.push(tmpNode);
     }
   }
-  newNode.dependencies = dependencyNodes;
+  newNode.data.info.dependencies = dependencyNodes;
   return newNode;
 };
 
-const calculateExpression = (node: NodeCache): number => {
-  let exp = node.expression;
-  for (const dependency of node.dependencies) {
-    if (dependency.currentValue !== undefined) {
-      exp = exp.replace(dependency.name, dependency.currentValue.toString());
+const calculateExpression = (node: Node): number => {
+  let exp = node.data.info?.expression;
+  for (const dependency of node.data.info?.dependencies) {
+    if (dependency.data.info.currentValue !== undefined) {
+      exp = exp.replace(
+        dependency.data.info.name,
+        dependency.data.info.currentValue.toString(),
+      );
     }
   }
   return evaluate(exp);

@@ -11,24 +11,6 @@ import {
 import { calculateGraph } from "./calc";
 import { FormGroup } from "@blueprintjs/core";
 
-// Why not Node.dependencies is not Node[]? => It is not a good for future extension if occures closed loop.
-export interface NodeCache {
-  id: string;
-  name: string;
-  viewName: string;
-  expression: string;
-  unit: string;
-  status: string;
-  currentValue?: number;
-  initValue: number;
-  expected: number;
-  dependencies: NodeCache[];
-  dependencyNames: string[];
-  depth: number;
-  description: string;
-  isVisited: boolean;
-}
-
 export interface Node {
   group: "nodes";
   data: Data;
@@ -64,15 +46,15 @@ interface Info {
   isVisited: boolean;
 }
 
-const createEdge = (node: NodeCache): Edge[] => {
+const createEdge = (node: Node): Edge[] => {
   const edges: Edge[] = [];
-  for (const dependency of node.dependencies) {
+  for (const dependency of node.data.info.dependencies) {
     const edge: Edge = {
       group: "edges",
       data: {
-        id: `${node.name}-${dependency.name}`,
-        source: node.id,
-        target: dependency.id,
+        id: `${node.data.info.name}-${dependency.data.info.name}`,
+        source: node.data.id,
+        target: dependency.data.id,
       },
     };
     edges.push(edge);
@@ -80,223 +62,96 @@ const createEdge = (node: NodeCache): Edge[] => {
   return edges;
 };
 
-const formatNodefromCache = (nodeCache: NodeCache): Node => {
-  const label = `${nodeCache.name}\n \n${nodeCache.expression} = ${nodeCache.currentValue} \nexpected: ${nodeCache.expected}`;
-  const newNode: Node = {
-    group: "nodes",
-    data: {
-      id: nodeCache.id,
-      label: label,
-      info: {
-        name: nodeCache.name,
-        viewName: nodeCache.viewName,
-        expression: nodeCache.expression,
-        unit: nodeCache.unit,
-        status: nodeCache.status,
-        currentValue: nodeCache.currentValue,
-        initValue: nodeCache.initValue,
-        expected: nodeCache.expected,
-        dependencies: [], // TODO
-        dependencyNames: nodeCache.dependencyNames,
-        depth: nodeCache.depth,
-        description: nodeCache.description,
-        isVisited: nodeCache.isVisited,
-      },
-    },
-    position: { x: 100, y: 200 * nodeCache.depth },
-  };
-  return newNode;
-};
-
-const formatNodefromCacheTree = (node: NodeCache): Node[] => {
-  let serialNode: Node[] = [];
-  serialNode.push(formatNodefromCache(node));
-  for (const dependency of node.dependencies) {
-    if (dependency.dependencies.length === 0) {
-      const tmpNode = formatNodefromCache(dependency);
-      serialNode.push(tmpNode);
-    } else {
-      const tmpNodes = formatNodefromCacheTree(dependency);
-      serialNode = [...serialNode, ...tmpNodes];
-    }
-  }
-
-  return serialNode;
-};
-
-const updateNodeCache = (node: NodeCache, value: number): NodeCache => {
-  console.log("updateNodeCache");
-  return node;
-};
-
 // Unique ID generator
-const getUniqueNodeID = (nodes: NodeCache): string => {};
+const getUniqueNodeID = (nodes: Node): string => {};
 
-const EXAMPLE_DATA: NodeCache[] = [
+const EXAMPLE_DATA: Data[] = [
   {
     id: "0",
-    name: "result",
-    viewName: "Top Node",
-    expression: "a + b",
-    unit: "-",
-    status: "calc",
-    initValue: 0,
-    expected: 9,
-    dependencies: [],
-    dependencyNames: [],
-    depth: 0,
-    description: "",
-    isVisited: false,
+    info: {
+      name: "result",
+      viewName: "Top Node",
+      expression: "a + b",
+      unit: "V",
+      status: "calc",
+      initValue: 0,
+      expected: 9,
+      dependencies: [],
+      dependencyNames: [],
+      depth: 0,
+      description: "",
+      isVisited: false,
+    },
   },
   {
     id: "1",
-    name: "a",
-    viewName: "View a",
-    expression: "c + d",
-    unit: "-",
-    status: "calc",
-    initValue: 1,
-    expected: 7,
-    dependencies: [],
-    dependencyNames: [],
-    depth: 1,
-    description: "",
-    isVisited: false,
+    info: {
+      name: "a",
+      viewName: "View a",
+      expression: "c + d",
+      unit: "V",
+      status: "calc",
+      initValue: 1,
+      expected: 7,
+      dependencies: [],
+      dependencyNames: [],
+      depth: 1,
+      description: "",
+      isVisited: false,
+    },
   },
   {
     id: "2",
-    name: "b",
-    viewName: "View b",
-    expression: "",
-    unit: "-",
-    status: "calc",
-    initValue: 2,
-    expected: 2,
-    dependencies: [],
-    dependencyNames: [],
-    depth: 1,
-    description: "",
-    isVisited: false,
+    info: {
+      name: "b",
+      viewName: "View b",
+      expression: "",
+      unit: "V",
+      status: "calc",
+      initValue: 2,
+      expected: 2,
+      dependencies: [],
+      dependencyNames: [],
+      depth: 1,
+      description: "",
+      isVisited: false,
+    },
   },
   {
     id: "3",
-    name: "c",
-    viewName: "View c",
-    expression: "",
-    unit: "-",
-    status: "input",
-    initValue: 3,
-    expected: 3,
-    dependencies: [],
-    dependencyNames: [],
-    depth: 2,
-    description: "",
-    isVisited: false,
+    info: {
+      name: "c",
+      viewName: "View c",
+      expression: "",
+      unit: "V",
+      status: "input",
+      initValue: 3,
+      expected: 3,
+      dependencies: [],
+      dependencyNames: [],
+      depth: 2,
+      description: "",
+      isVisited: false,
+    },
   },
   {
     id: "4",
-    name: "d",
-    viewName: "View d",
-    expression: "",
-    unit: "-",
-    status: "input",
-    initValue: 4,
-    expected: 4,
-    dependencies: [],
-    dependencyNames: [],
-    depth: 2,
-    description: "",
-    isVisited: false,
+    info: {
+      name: "d",
+      viewName: "View d",
+      expression: "",
+      unit: "V",
+      status: "input",
+      initValue: 4,
+      expected: 4,
+      dependencies: [],
+      dependencyNames: [],
+      depth: 2,
+      description: "",
+      isVisited: false,
+    },
   },
 ];
-
-// const EXAMPLE_DATA: Data[] = [
-//   {
-//     id: "0",
-//     info: {
-//       name: "result",
-//       viewName: "Top Node",
-//       expression: "a + b",
-//       unit: "-",
-//       status: "calc",
-//       initValue: 0,
-//       expected: 9,
-//       dependencies: [],
-//       dependencyNames: [],
-//       depth: 0,
-//       description: "",
-//       isVisited: false,
-//     },
-//   },
-//   {
-//     id: "1",
-//     info: {
-//       name: "a",
-//       viewName: "View a",
-//       expression: "c + d",
-//       unit: "-",
-//       status: "calc",
-//       initValue: 1,
-//       expected: 7,
-//       dependencies: [],
-//       dependencyNames: [],
-//       depth: 1,
-//       description: "",
-//       isVisited: false,
-//     },
-//   },
-//   {
-//     id: "2",
-//     info: {
-//       name: "b",
-//       viewName: "View b",
-//       expression: "",
-//       unit: "-",
-//       status: "calc",
-//       initValue: 2,
-//       expected: 2,
-//       dependencies: [],
-//       dependencyNames: [],
-//       depth: 1,
-//       description: "",
-//       isVisited: false,
-//     },
-//   },
-//   {
-//     id: "3",
-//     info: {
-//       name: "c",
-//       viewName: "View c",
-//       expression: "",
-//       unit: "-",
-//       status: "input",
-//       initValue: 3,
-//       expected: 3,
-//       dependencies: [],
-//       dependencyNames: [],
-//       depth: 2,
-//       description: "",
-//       isVisited: false,
-//     },
-//   },
-//   {
-//     id: "4",
-//     info: {
-//       name: "d",
-//       viewName: "View d",
-//       expression: "",
-//       unit: "-",
-//       status: "input",
-//       initValue: 4,
-//       expected: 4,
-//       dependencies: [],
-//       dependencyNames: [],
-//       depth: 2,
-//       description: "",
-//       isVisited: false,
-//     },
-//   },
-// ];
 
 const ELEMENT_STYLE = [
   {
@@ -335,40 +190,84 @@ const ELEMENT_STYLE = [
   },
 ];
 
-const createElements = (nodes: NodeCache[]) => {
-  const addedDependencyNamesNodes: NodeCache[] = [];
+const serializeNode = (node: Node): Node[] => {
+  const deps = node.data.info?.dependencies;
+  const serialNodes: Node[] = [];
+  if (deps?.length !== 0) {
+    for(const dep of deps) {
+      const tmpNode = serializeNode(dep);
+      serialNodes.push(...tmpNode);
+    }
+  }
+
+  serialNodes.push(node);
+  return serialNodes;
+};
+
+const addPosition = (node: Node): Node => {
+  return {
+    ...node,
+    position: {
+      x: 100,
+      y: 200 * node.data.info.depth,
+    },
+  };
+};
+
+const addLabel = (node: Node): Node => {
+  const lable = `${node.data.info.name}\n${node.data.info.viewName}\n${node.data.info.expression} = ${node.data.info.currentValue} ${node.data.info.unit}\nexpected: ${node.data.info?.expected} ${node.data.info.unit}`
+  return {
+    ...node,
+    data: {
+      ...node.data,
+      label: lable,
+    },
+  };
+};
+
+const createElements = (nodes: Node[]) => {
+  const addedDependencyNamesNodes: Node[] = [];
   for (const node of nodes) {
     const dependencyNames: string[] = extractDependencyNames(node);
-    const newNode = { ...node, dependencyNames: dependencyNames };
+    const newNode: Node = { 
+      ...node,
+      data: {
+        ...node.data,
+        label: "",
+        info: {
+          ...node.data.info,
+          dependencyNames: dependencyNames,
+        },
+      },
+    };
     addedDependencyNamesNodes.push(newNode);
   }
 
-  const addedDependenciesNodes: NodeCache[] = addDependencies(
+  const addedDependenciesNodes: Node[] = addDependencies(
     addedDependencyNamesNodes,
   );
 
   // TODO: targetNode should be selected by user.
   const targetNode = addedDependenciesNodes[0];
-  const graphNodes: NodeCache = makeNodeGraph(
+  const graphNodes: Node = makeNodeGraph(
     targetNode,
     addedDependenciesNodes,
   );
 
-  const calculateadNode = calculateGraph(graphNodes);
+  const calculatedNodes = calculateGraph(graphNodes);
+  const serialNodes = serializeNode(calculatedNodes);
 
   const edges: Edge[] = [];
-  for (const node of addedDependenciesNodes) {
+  for (const node of serialNodes) {
     const edges_tmp = createEdge(node);
     for (const edge of edges_tmp) {
       edges.push(edge);
     }
   }
 
-  const nodesFromGraph: Node[] = formatNodefromCacheTree(calculateadNode);
-
   const elements = [];
-  for (const node of nodesFromGraph) {
-    elements.push(node);
+  for (const node of serialNodes) {
+    elements.push(addLabel(addPosition(node)));
   }
   for (const edge of edges) {
     elements.push(edge);
@@ -378,7 +277,7 @@ const createElements = (nodes: NodeCache[]) => {
 };
 
 const Graph: React.FC = () => {
-  const [newNode, setNewNode] = useState<NodeCache | null>(null);
+  const [newNode, setNewNode] = useState<Node | null>(null);
   const [name, setName] = useState("");
   const [viewName, setViewName] = useState<string | undefined>("");
   const [unit, setUnit] = useState<string | undefined>("");
@@ -406,7 +305,7 @@ const Graph: React.FC = () => {
     // const newId = getUniqueNodeID();
     const newId = "5";
     const dependencyNames = extractDependencyNames(newNode);
-    const node: NodeCache = {
+    const node: Node = {
       id: newId,
       name: name,
       viewName: viewName ? viewName : "",
@@ -427,7 +326,16 @@ const Graph: React.FC = () => {
     setNewNode(node);
   };
 
-  let exampleNodes: NodeCache[] = EXAMPLE_DATA;
+  let exampleNodesData: Data[] = EXAMPLE_DATA;
+  const exampleNodes: Node[] = [];
+  for (const data of exampleNodesData) {
+    const node: Node = {
+      group: "nodes",
+      data: data,
+    }
+    exampleNodes.push(node);
+  }
+
   const elements = createElements(exampleNodes);
 
   useEffect(() => {

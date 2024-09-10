@@ -1,8 +1,12 @@
 import { tokenize, Token, TokenType } from "./tokenize";
-import { NodeCache } from "./page";
+import { Node } from "./page";
 
-export const extractDependencyNames = (node: NodeCache): string[] => {
-  const tokens: Token[] = tokenize(node.expression);
+export const extractDependencyNames = (node: Node): string[] => {
+  if (node.data.info === undefined) {
+    return [];
+  }
+
+  const tokens: Token[] = tokenize(node.data.info.expression);
   const dependencies: string[] = [];
   for (const token of tokens) {
     if (token.type === TokenType.Variable) {
@@ -13,42 +17,54 @@ export const extractDependencyNames = (node: NodeCache): string[] => {
   return dependencies;
 };
 
-export const addDependencies = (nodes: NodeCache[]): NodeCache[] => {
-  const newNodes: NodeCache[] = [];
+export const addDependencies = (nodes: Node[]): Node[] => {
+  const newNodes: Node[] = [];
   for (const node of nodes) {
-    const dependencyNodes: NodeCache[] = [];
-    for (const dependencyName of node.dependencyNames) {
-      const dependencyNode = nodes.find((n) => n.name === dependencyName);
+    if (node.data.info === undefined) {
+      return [];
+    }
+
+    const dependencyNodes: Node[] = [];
+    for (const dependencyName of node.data.info.dependencyNames) {
+      const dependencyNode = nodes.find(
+        (n) => n.data.info?.name === dependencyName,
+      );
       if (dependencyNode) {
         dependencyNodes.push(dependencyNode);
       }
     }
-    newNodes.push({ ...node, dependencies: dependencyNodes });
+    newNodes.push({
+      ...node,
+      data: {
+        ...node.data,
+        info: {
+          ...node.data.info,
+          dependencies: dependencyNodes,
+        },
+      },
+    });
   }
 
   return newNodes;
 };
 
-export const makeNodeGraph = (
-  targetNode: NodeCache,
-  nodes: NodeCache[]
-): NodeCache => {
+export const makeNodeGraph = (targetNode: Node, nodes: Node[]): Node => {
   const newNode = { ...targetNode };
-  const depsNodes: NodeCache[] = [];
+  const depsNodes: Node[] = [];
 
   if (
-    targetNode.dependencyNames.length !== 0 &&
-    targetNode.isVisited === false
+    targetNode.data.info?.dependencyNames.length !== 0 &&
+    targetNode.data.info?.isVisited === false
   ) {
-    for (const name of targetNode.dependencyNames) {
-      const dependencyNode = nodes.find((n) => n.name === name);
+    for (const name of targetNode.data.info?.dependencyNames) {
+      const dependencyNode = nodes.find((n) => n.data.info?.name === name);
       if (dependencyNode) {
         const tmpNode = makeNodeGraph(dependencyNode, nodes);
         depsNodes.push(tmpNode);
       }
     }
   }
-  newNode.dependencies = depsNodes;
-  newNode.isVisited = true;
+  newNode.data.info.dependencies = depsNodes;
+  newNode.data.info.isVisited = true;
   return newNode;
 };
