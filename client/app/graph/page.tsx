@@ -288,43 +288,16 @@ const Graph: React.FC = () => {
     const selectedNode = e.target._private.data;
     console.log("---selectedNode---");
     console.log(selectedNode);
-    setName(selectedNode.additional?.name);
-    setViewName(selectedNode.additional?.viewName);
-    setUnit(selectedNode.additional?.unit);
-    setExpression(selectedNode.additional?.expression);
-    setDesc(selectedNode.additional?.description);
+    setName(selectedNode.info.name);
+    setViewName(selectedNode.info.viewName);
+    setUnit(selectedNode.info.unit);
+    setExpression(selectedNode.info.expression);
+    setDesc(selectedNode.info.description);
   };
 
   const handleEditNodeButtonClick = () => {};
 
-  const handleAddNodeButtonClick = () => {
-    if (newNode === null) {
-      return null;
-    }
-
-    // const newId = getUniqueNodeID();
-    const newId = "5";
-    const dependencyNames = extractDependencyNames(newNode);
-    const node: Node = {
-      id: newId,
-      name: name,
-      viewName: viewName ? viewName : "",
-      expression: expression ? expression : "",
-      unit: unit ? unit : "",
-      status: "",
-      initValue: 0, // TODO: automatically calculated
-      expected: 0, // TODO: if user input
-      dependencies: [], // TODO: calculated after
-      dependencyNames: dependencyNames,
-      depth: 0, // TOOD: automatically calculated
-      description: desc ? desc : "",
-      isVisited: false,
-    };
-    if (newNode.currentValue !== undefined) {
-      node.currentValue = newNode.currentValue;
-    }
-    setNewNode(node);
-  };
+  const handleAddNodeButtonClick = () => {};
 
   let exampleNodesData: Data[] = EXAMPLE_DATA;
   const exampleNodes: Node[] = [];
@@ -393,7 +366,7 @@ const Graph: React.FC = () => {
             </div>
             <Button
               intent="success"
-              onClick={handleAddNodeButtonClick}
+              onClick={handleEditNodeButtonClick}
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >
               Edit
