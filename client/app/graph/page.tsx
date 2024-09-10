@@ -25,9 +25,14 @@ export interface Edge {
 export interface Data {
   id: string;
   label?: string;
-  info?: Info; // ? means optional for Edge
-  source?: string;
-  target?: string;
+  info: Info;
+}
+
+export interface EdgeData {
+  id: string;
+  label?: string;
+  source: string;
+  target: string;
 }
 
 interface Info {
@@ -278,10 +283,10 @@ const createElements = (nodes: Node[]) => {
 
 const Graph: React.FC = () => {
   const [name, setName] = useState("");
-  const [viewName, setViewName] = useState<string | undefined>("");
-  const [unit, setUnit] = useState<string | undefined>("");
-  const [expression, setExpression] = useState<string | undefined>("");
-  const [desc, setDesc] = useState<string | undefined>("");
+  const [viewName, setViewName] = useState<string>("");
+  const [unit, setUnit] = useState<string>("");
+  const [expression, setExpression] = useState<string>("");
+  const [desc, setDesc] = useState<string>("");
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
 
   const [nodesData, setNodesData] = useState<Data[]>(EXAMPLE_DATA);
