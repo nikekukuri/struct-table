@@ -27,7 +27,7 @@ export const addDependencies = (nodes: Node[]): Node[] => {
     const dependencyNodes: Node[] = [];
     for (const dependencyName of node.data.info.dependencyNames) {
       const dependencyNode = nodes.find(
-        (n) => n.data.info?.name === dependencyName,
+        (n) => n.data.info.name === dependencyName,
       );
       if (dependencyNode) {
         dependencyNodes.push(dependencyNode);
@@ -53,11 +53,11 @@ export const makeNodeGraph = (targetNode: Node, nodes: Node[]): Node => {
   const depsNodes: Node[] = [];
 
   if (
-    targetNode.data.info?.dependencyNames.length !== 0 &&
-    targetNode.data.info?.isVisited === false
+    targetNode.data.info.dependencyNames.length !== 0 &&
+    targetNode.data.info.isVisited === false
   ) {
-    for (const name of targetNode.data.info?.dependencyNames) {
-      const dependencyNode = nodes.find((n) => n.data.info?.name === name);
+    for (const name of targetNode.data.info.dependencyNames) {
+      const dependencyNode = nodes.find((n) => n.data.info.name === name);
       if (dependencyNode) {
         const tmpNode = makeNodeGraph(dependencyNode, nodes);
         depsNodes.push(tmpNode);
