@@ -321,7 +321,6 @@ const Graph: React.FC = () => {
   }
 
   const elementFromNode = () => {
-    console.log("hoge");
     const nodes: Node[] = [];
     for (const data of nodesData) {
       const node: Node = {
