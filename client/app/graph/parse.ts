@@ -38,7 +38,7 @@ export const makeNodeGraph = (
 
   if (
     targetNode.dependencyNames.length !== 0 &&
-    targetNode.is_visited === false
+    targetNode.isVisited === false
   ) {
     for (const name of targetNode.dependencyNames) {
       const dependencyNode = nodes.find((n) => n.name === name);
@@ -49,6 +49,6 @@ export const makeNodeGraph = (
     }
   }
   newNode.dependencies = depsNodes;
-  newNode.is_visited = true;
+  newNode.isVisited = true;
   return newNode;
 };

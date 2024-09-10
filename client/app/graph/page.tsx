@@ -15,17 +15,17 @@ import { FormGroup } from "@blueprintjs/core";
 export interface NodeCache {
   id: string;
   name: string;
-  view_name: string;
+  viewName: string;
   expression: string;
   unit: string;
   status: string;
-  current_value?: number;
-  init_value: number;
+  currentValue?: number;
+  initValue: number;
   expected: number;
   dependencies: NodeCache[];
   dependencyNames: string[];
   description: string;
-  is_visited: boolean;
+  isVisited: boolean;
 }
 
 export interface Node {
@@ -36,12 +36,15 @@ export interface Node {
 }
 
 interface Additional {
-  expression: string;
-  value: number;
-  name: string;
   viewName: string;
-  dependencyNames: string[];
+  expression: string;
   unit: string;
+  status: string;
+  currentValue?: number;
+  initValue: number;
+  expected: number;
+  dependencyNames: string[];
+  description: string;
 }
 
 export interface Edge {
@@ -73,23 +76,27 @@ const createEdge = (node: NodeCache): Edge[] => {
   return edges;
 };
 
-const formatNodefromCache = (node: NodeCache): Node => {
-  const label = `${node.name}\n \n${node.expression} = ${node.current_value} \n${node.expected}`;
+const formatNodefromCache = (nodeCache: NodeCache): Node => {
+  const label = `${nodeCache.name}\n \n${nodeCache.expression} = ${nodeCache.currentValue} \nexpected: ${nodeCache.expected}`;
   const newNode: Node = {
     group: "nodes",
     data: {
-      id: node.id,
+      id: nodeCache.id,
       label: label,
-      info: `Expression: ${node.expression}\nExpected: ${node.expected}`,
-      additional: {
-        expression: node.expression,
-        value: node.current_value ? node.current_value : node.init_value,
-        viewName: node.view_name,
-        dependencyNames: node.dependencyNames,
-        unit: node.unit,
-      },
+      info: `Expression: ${nodeCache.expression}\nExpected: ${nodeCache.expected}`,
     },
     position: { x: 100, y: 100 },
+    additional: {
+      viewName: nodeCache.viewName,
+      expression: nodeCache.expression,
+      unit: nodeCache.unit,
+      status: nodeCache.status,
+      currentValue: nodeCache.currentValue,
+      initValue: nodeCache.initValue,
+      expected: nodeCache.expected,
+      dependencyNames: nodeCache.dependencyNames,
+      description: nodeCache.description,
+    },
   };
   return newNode;
 };
@@ -110,95 +117,103 @@ const formatNodefromCacheTree = (node: NodeCache): Node[] => {
   return serialNode;
 };
 
-const searchTargetNode = (node: NodeCache): NodeCache | null => {
-  return node;
-};
+// Unique ID generator
+const getUniqueNodeID = (nodes: NodeCache): string => {
+
+
+}
+
 
 const EXAMPLE_DATA: NodeCache[] = [
   {
     id: "0",
     name: "result",
-    view_name: "Top Node",
+    viewName: "Top Node",
     expression: "a + b",
     unit: "-",
     status: "calc",
-    init_value: 0,
+    initValue: 0,
     expected: 9,
     dependencies: [],
     dependencyNames: [],
     description: "",
-    is_visited: false,
+    isVisited: false,
   },
   {
     id: "1",
     name: "a",
-    view_name: "View a",
+    viewName: "View a",
     expression: "c + d",
     unit: "-",
     status: "calc",
-    init_value: 1,
+    initValue: 1,
     expected: 7,
     dependencies: [],
     dependencyNames: [],
     description: "",
-    is_visited: false,
+    isVisited: false,
   },
   {
     id: "2",
     name: "b",
-    view_name: "View b",
+    viewName: "View b",
     expression: "",
     unit: "-",
     status: "calc",
-    init_value: 2,
+    initValue: 2,
     expected: 2,
     dependencies: [],
     dependencyNames: [],
     description: "",
-    is_visited: false,
+    isVisited: false,
   },
   {
     id: "3",
     name: "c",
-    view_name: "View c",
+    viewName: "View c",
     expression: "",
     unit: "-",
     status: "input",
-    init_value: 3,
+    initValue: 3,
     expected: 3,
     dependencies: [],
     dependencyNames: [],
     description: "",
-    is_visited: false,
+    isVisited: false,
   },
   {
     id: "4",
     name: "d",
-    view_name: "View d",
+    viewName: "View d",
     expression: "",
     unit: "-",
     status: "input",
-    init_value: 4,
+    initValue: 4,
     expected: 4,
     dependencies: [],
     dependencyNames: [],
     description: "",
-    is_visited: false,
+    isVisited: false,
   },
 ];
 
 const Graph: React.FC = () => {
+  const [newNode, setNewNode] = useState<NodeCache | null>(null);
   const [name, setName] = useState("");
   const [viewName, setViewName] = useState("");
   const [value, setValue] = useState("");
+  const [unit, setUnit] = useState("");
   const [expression, setExpression] = useState("");
+  const [desc, setDesc] = useState("");
 
   const handleNodeSelection = (e: any) => {
     const node = e.target;
     setName(node.data.id);
-    setViewName(node.data("additional").viewName);
-    setValue(node.data("additional").value);
-    setExpression(node.data("additional").expression);
+    setViewName(node.additional.viewName);
+    setValue(node.additional.value);
+    setUnit(node.additional.unit);
+    setExpression(node.additional.expression);
+    setDesc(node.additional.description);
   };
 
   // Make tree construction from the nodes.
@@ -236,20 +251,32 @@ const Graph: React.FC = () => {
   console.log("---calculateadNodes---");
   console.log(calculateadNode);
 
-  const handleUpdateButtonClick = () => {
-    const node = searchTargetNode();
-    if (false) {
-    } else {
-      alert("No node selected");
+  const handleAddNodeButtonClick = () => {
+    if (newNode === null) {
+      return null;
     }
-  };
 
-  // const nodes: Node[] = [];
-  // for (const node of addedDependenciesNodes) {
-  //   nodes.push(formatNodefromCache(node));
-  // }
-  // console.log("---serialNodes---");
-  // console.log(nodes);
+    const newId = getUniqueNodeID();
+    const dependencyNames = extractDependencyNames(newNode);
+    const node: NodeCache = {
+      id: newId,
+      name: name,
+      viewName: viewName,
+      expression: expression,
+      unit: unit,
+      status: "",
+      initValue: 0, // TODO: automatically calculated
+      expected: 0, // TODO: if user input
+      dependencies: [], // TODO: calculaterd after
+      dependencyNames: dependencyNames,
+      description: desc,
+      isVisited: false,
+    }
+    if (newNode.currentValue !== undefined) {
+      node.currentValue = newNode.currentValue;
+    }
+    return node;
+  };
 
   const nodesFromGraph: Node[] = formatNodefromCacheTree(calculateadNode);
   console.log("---nodesFromGraph---");
@@ -275,7 +302,7 @@ const Graph: React.FC = () => {
         label: "data(label)",
         "text-valign": "center",
         "text-halign": "center",
-        "font-size": "12px",
+        "font-size": "14px",
         color: "#ffffff",
         "text-wrap": "wrap", // Allow text to wrap within the node
         "text-max-width": "80px", // Set maximum width for text wrapping
@@ -343,12 +370,26 @@ const Graph: React.FC = () => {
                 onChange={(e) => setExpression(e.target.value)}
               ></InputGroup>
             </div>
+            <div className="mb-4">
+              <label>unit</label>
+              <InputGroup
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+              ></InputGroup>
+            </div>
+            <div className="mb-4">
+              <label>Description</label>
+              <InputGroup
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+              ></InputGroup>
+            </div>
             <Button
               intent="success"
-              onClick={handleUpdateButtonClick}
+              onClick={handleAddNodeButtonClick}
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >
-              Edit
+              Add
             </Button>
           </FormGroup>
         </div>

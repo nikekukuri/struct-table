@@ -6,7 +6,7 @@ export const calculateGraph = (node: NodeCache): NodeCache => {
   // console.log("---filledEdgesNode---");
   // console.log(filledEdgesNode);
   const calculatedNode = calculateRecursive(filledEdgesNode);
-  calculatedNode.current_value = calculateExpression(calculatedNode);
+  calculatedNode.currentValue = calculateExpression(calculatedNode);
   return calculatedNode;
 };
 
@@ -21,9 +21,9 @@ export const calculateRecursive = (node: NodeCache): NodeCache => {
       console.log(`Recursive process: ${dependency.name}`);
       const tmpNode = calculateRecursive(dependency);
       dependencyNodes.push(tmpNode);
-    } else if (dependency.current_value === undefined) {
+    } else if (dependency.currentValue === undefined) {
       // Calculate current value
-      dependency.current_value = calculateExpression(dependency);
+      dependency.currentValue = calculateExpression(dependency);
     }
     dependencyNodes.push(dependency);
   }
@@ -33,7 +33,7 @@ export const calculateRecursive = (node: NodeCache): NodeCache => {
 
 const isAllDependenciesCalculated = (node: NodeCache): boolean => {
   for (const dependency of node.dependencies) {
-    if (dependency.current_value === undefined) {
+    if (dependency.currentValue === undefined) {
       return false;
     }
   }
@@ -52,7 +52,7 @@ const fillInitialValueOnEdges = (node: NodeCache): NodeCache => {
   const dependencyNodes = [];
   for (const dependency of node.dependencies) {
     if (isEdgeNode(dependency)) {
-      dependency.current_value = dependency.init_value;
+      dependency.currentValue = dependency.initValue;
       dependencyNodes.push(dependency);
     } else {
       // Recursive process
@@ -67,8 +67,8 @@ const fillInitialValueOnEdges = (node: NodeCache): NodeCache => {
 const calculateExpression = (node: NodeCache): number => {
   let exp = node.expression;
   for (const dependency of node.dependencies) {
-    if (dependency.current_value !== undefined) {
-      exp = exp.replace(dependency.name, dependency.current_value.toString());
+    if (dependency.currentValue !== undefined) {
+      exp = exp.replace(dependency.name, dependency.currentValue.toString());
     }
   }
   return evaluate(exp);
