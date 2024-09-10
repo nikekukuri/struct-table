@@ -32,19 +32,6 @@ export interface Node {
   group: "nodes";
   data: Data;
   position?: { x: number; y: number };
-  additional?: Additional;
-}
-
-interface Additional {
-  viewName: string;
-  expression: string;
-  unit: string;
-  status: string;
-  currentValue?: number;
-  initValue: number;
-  expected: number;
-  dependencyNames: string[];
-  description: string;
 }
 
 export interface Edge {
@@ -58,6 +45,19 @@ export interface Data {
   info?: string;
   source?: string;
   target?: string;
+  additional?: Additional;
+}
+
+interface Additional {
+  viewName: string;
+  expression: string;
+  unit: string;
+  status: string;
+  currentValue?: number;
+  initValue: number;
+  expected: number;
+  dependencyNames: string[];
+  description: string;
 }
 
 const createEdge = (node: NodeCache): Edge[] => {
@@ -84,19 +84,19 @@ const formatNodefromCache = (nodeCache: NodeCache): Node => {
       id: nodeCache.id,
       label: label,
       info: `Expression: ${nodeCache.expression}\nExpected: ${nodeCache.expected}`,
+      additional: {
+        viewName: nodeCache.viewName,
+        expression: nodeCache.expression,
+        unit: nodeCache.unit,
+        status: nodeCache.status,
+        currentValue: nodeCache.currentValue,
+        initValue: nodeCache.initValue,
+        expected: nodeCache.expected,
+        dependencyNames: nodeCache.dependencyNames,
+        description: nodeCache.description,
+      },
     },
     position: { x: 100, y: 100 },
-    additional: {
-      viewName: nodeCache.viewName,
-      expression: nodeCache.expression,
-      unit: nodeCache.unit,
-      status: nodeCache.status,
-      currentValue: nodeCache.currentValue,
-      initValue: nodeCache.initValue,
-      expected: nodeCache.expected,
-      dependencyNames: nodeCache.dependencyNames,
-      description: nodeCache.description,
-    },
   };
   return newNode;
 };
@@ -202,8 +202,9 @@ const Graph: React.FC = () => {
   const [desc, setDesc] = useState<string | undefined>("");
 
   const handleNodeSelection = (e: any) => {
-    const selectedNode: Node = e.target;
-    setName(selectedNode.data.id);
+    const selectedNode = e.target._private.data;
+    console.log(selectedNode);
+    setName(selectedNode.id);
     setViewName(selectedNode.additional?.viewName);
     setUnit(selectedNode.additional?.unit);
     setExpression(selectedNode.additional?.expression);
