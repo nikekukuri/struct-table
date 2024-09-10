@@ -293,11 +293,12 @@ const createElements = (nodes: Node[]) => {
 const Graph: React.FC = () => {
   const [name, setName] = useState("");
   const [viewName, setViewName] = useState<string>("");
-  const [unit, setUnit] = useState<string>("");
+  const [initValue, setInitValue] = useState<number>(0);
   const [expression, setExpression] = useState<string>("");
+  const [unit, setUnit] = useState<string>("");
   const [desc, setDesc] = useState<string>("");
-  const [elements, setElements] = useState<(Node | Edge)[]>([]);
 
+  const [elements, setElements] = useState<(Node | Edge)[]>([]);
   const [nodesData, setNodesData] = useState<Data[]>(EXAMPLE_DATA);
 
   const handleNodeSelection = (e: any) => {
@@ -306,6 +307,7 @@ const Graph: React.FC = () => {
     console.log(selectedNode);
     setName(selectedNode.info.name);
     setViewName(selectedNode.info.viewName);
+    setInitValue(selectedNode.info.initValue);
     setUnit(selectedNode.info.unit);
     setExpression(selectedNode.info.expression);
     setDesc(selectedNode.info.description);
@@ -347,6 +349,7 @@ const Graph: React.FC = () => {
       const updatedNodesData = [...nodesData];
       updatedNodesData[targetNodeIdx].info.name = name;
       updatedNodesData[targetNodeIdx].info.viewName = viewName;
+      updatedNodesData[targetNodeIdx].info.initValue = initValue;
       updatedNodesData[targetNodeIdx].info.unit = unit;
       updatedNodesData[targetNodeIdx].info.expression = expression;
       updatedNodesData[targetNodeIdx].info.description = desc;
@@ -407,6 +410,13 @@ const Graph: React.FC = () => {
               <InputGroup
                 value={viewName}
                 onChange={(e) => setViewName(e.target.value)}
+              ></InputGroup>
+            </div>
+            <div className="mb-4">
+              <label>initial value</label>
+              <InputGroup
+                value={initValue}
+                onChange={(e) => setInitValue(e.target.value)}
               ></InputGroup>
             </div>
             <div className="mb-4">
