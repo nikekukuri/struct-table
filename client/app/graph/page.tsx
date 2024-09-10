@@ -67,8 +67,20 @@ const createEdge = (node: Node): Edge[] => {
   return edges;
 };
 
-// Unique ID generator
-const getUniqueNodeID = (nodes: Node): string => {};
+const getUniqueNodeID = (data: Data[]): string => {
+  const ids = [];
+  for (const d of data) {
+    ids.push(parseInt(d.id));
+  }
+  let maxId = 0;
+  for (const id of ids) {
+    if (id > maxId) {
+      maxId = id;
+    }
+  }
+
+  return (maxId + 1).toString();
+};
 
 const EXAMPLE_DATA: Data[] = [
   {
@@ -345,7 +357,30 @@ const Graph: React.FC = () => {
     console.log(nodesData);
   };
 
-  const handleAddNodeButtonClick = () => {};
+  const handleAddNodeButtonClick = () => {
+    const id = getUniqueNodeID(nodesData);
+    // TODO: properties should be selected by user.
+    const newData: Data = {
+      id: id,
+      info: {
+        name: name,
+        viewName: viewName,
+        expression: expression,
+        unit: unit,
+        status: "calc",
+        initValue: 0,
+        expected: 0,
+        dependencies: [],
+        dependencyNames: [],
+        depth: 0,
+        description: desc,
+        isVisited: false,
+      },
+    };
+
+    const updatedData = [...nodesData, newData];
+    setNodesData(updatedData);
+  };
 
   return (
     <>
