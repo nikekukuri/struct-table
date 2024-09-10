@@ -1,7 +1,7 @@
 "use client";
 
 import CytoscapeComponent from "react-cytoscapejs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button, InputGroup } from "@blueprintjs/core";
 import {
   addDependencies,
@@ -24,6 +24,7 @@ export interface NodeCache {
   expected: number;
   dependencies: NodeCache[];
   dependencyNames: string[];
+  depth: number;
   description: string;
   isVisited: boolean;
 }
@@ -42,13 +43,13 @@ export interface Edge {
 export interface Data {
   id: string;
   label?: string;
-  info?: string;
+  info?: Info; // ? means optional for Edge
   source?: string;
   target?: string;
-  additional?: Additional;
 }
 
-interface Additional {
+interface Info {
+  name: string;
   viewName: string;
   expression: string;
   unit: string;
@@ -56,8 +57,11 @@ interface Additional {
   currentValue?: number;
   initValue: number;
   expected: number;
+  dependencies: Node[];
   dependencyNames: string[];
+  depth: number;
   description: string;
+  isVisited: boolean;
 }
 
 const createEdge = (node: NodeCache): Edge[] => {
@@ -83,8 +87,8 @@ const formatNodefromCache = (nodeCache: NodeCache): Node => {
     data: {
       id: nodeCache.id,
       label: label,
-      info: `Expression: ${nodeCache.expression}\nExpected: ${nodeCache.expected}`,
-      additional: {
+      info: {
+        name: nodeCache.name,
         viewName: nodeCache.viewName,
         expression: nodeCache.expression,
         unit: nodeCache.unit,
@@ -92,11 +96,14 @@ const formatNodefromCache = (nodeCache: NodeCache): Node => {
         currentValue: nodeCache.currentValue,
         initValue: nodeCache.initValue,
         expected: nodeCache.expected,
+        dependencies: [], // TODO
         dependencyNames: nodeCache.dependencyNames,
+        depth: nodeCache.depth,
         description: nodeCache.description,
+        isVisited: nodeCache.isVisited,
       },
     },
-    position: { x: 100, y: 100 },
+    position: { x: 100, y: 200 * nodeCache.depth },
   };
   return newNode;
 };
@@ -117,6 +124,11 @@ const formatNodefromCacheTree = (node: NodeCache): Node[] => {
   return serialNode;
 };
 
+const updateNodeCache = (node: NodeCache, value: number): NodeCache => {
+  console.log("updateNodeCache");
+  return node;
+};
+
 // Unique ID generator
 const getUniqueNodeID = (nodes: NodeCache): string => {};
 
@@ -132,6 +144,7 @@ const EXAMPLE_DATA: NodeCache[] = [
     expected: 9,
     dependencies: [],
     dependencyNames: [],
+    depth: 0,
     description: "",
     isVisited: false,
   },
@@ -146,6 +159,7 @@ const EXAMPLE_DATA: NodeCache[] = [
     expected: 7,
     dependencies: [],
     dependencyNames: [],
+    depth: 1,
     description: "",
     isVisited: false,
   },
@@ -160,6 +174,7 @@ const EXAMPLE_DATA: NodeCache[] = [
     expected: 2,
     dependencies: [],
     dependencyNames: [],
+    depth: 1,
     description: "",
     isVisited: false,
   },
@@ -174,6 +189,7 @@ const EXAMPLE_DATA: NodeCache[] = [
     expected: 3,
     dependencies: [],
     dependencyNames: [],
+    depth: 2,
     description: "",
     isVisited: false,
   },
@@ -188,10 +204,99 @@ const EXAMPLE_DATA: NodeCache[] = [
     expected: 4,
     dependencies: [],
     dependencyNames: [],
+    depth: 2,
     description: "",
     isVisited: false,
   },
 ];
+
+// const EXAMPLE_DATA: Data[] = [
+//   {
+//     id: "0",
+//     info: {
+//       name: "result",
+//       viewName: "Top Node",
+//       expression: "a + b",
+//       unit: "-",
+//       status: "calc",
+//       initValue: 0,
+//       expected: 9,
+//       dependencies: [],
+//       dependencyNames: [],
+//       depth: 0,
+//       description: "",
+//       isVisited: false,
+//     },
+//   },
+//   {
+//     id: "1",
+//     info: {
+//       name: "a",
+//       viewName: "View a",
+//       expression: "c + d",
+//       unit: "-",
+//       status: "calc",
+//       initValue: 1,
+//       expected: 7,
+//       dependencies: [],
+//       dependencyNames: [],
+//       depth: 1,
+//       description: "",
+//       isVisited: false,
+//     },
+//   },
+//   {
+//     id: "2",
+//     info: {
+//       name: "b",
+//       viewName: "View b",
+//       expression: "",
+//       unit: "-",
+//       status: "calc",
+//       initValue: 2,
+//       expected: 2,
+//       dependencies: [],
+//       dependencyNames: [],
+//       depth: 1,
+//       description: "",
+//       isVisited: false,
+//     },
+//   },
+//   {
+//     id: "3",
+//     info: {
+//       name: "c",
+//       viewName: "View c",
+//       expression: "",
+//       unit: "-",
+//       status: "input",
+//       initValue: 3,
+//       expected: 3,
+//       dependencies: [],
+//       dependencyNames: [],
+//       depth: 2,
+//       description: "",
+//       isVisited: false,
+//     },
+//   },
+//   {
+//     id: "4",
+//     info: {
+//       name: "d",
+//       viewName: "View d",
+//       expression: "",
+//       unit: "-",
+//       status: "input",
+//       initValue: 4,
+//       expected: 4,
+//       dependencies: [],
+//       dependencyNames: [],
+//       depth: 2,
+//       description: "",
+//       isVisited: false,
+//     },
+//   },
+// ];
 
 const ELEMENT_STYLE = [
   {
@@ -248,12 +353,8 @@ const createElements = (nodes: NodeCache[]) => {
     targetNode,
     addedDependenciesNodes,
   );
-  console.log("---graphNodes---");
-  console.log(graphNodes);
 
   const calculateadNode = calculateGraph(graphNodes);
-  console.log("---calculateadNodes---");
-  console.log(calculateadNode);
 
   const edges: Edge[] = [];
   for (const node of addedDependenciesNodes) {
@@ -262,12 +363,8 @@ const createElements = (nodes: NodeCache[]) => {
       edges.push(edge);
     }
   }
-  console.log("---edges---");
-  console.log(edges);
 
   const nodesFromGraph: Node[] = formatNodefromCacheTree(calculateadNode);
-  console.log("---nodesFromGraph---");
-  console.log(nodesFromGraph);
 
   const elements = [];
   for (const node of nodesFromGraph) {
@@ -290,20 +387,24 @@ const Graph: React.FC = () => {
 
   const handleNodeSelection = (e: any) => {
     const selectedNode = e.target._private.data;
+    console.log("---selectedNode---");
     console.log(selectedNode);
-    setName(selectedNode.id);
+    setName(selectedNode.additional?.name);
     setViewName(selectedNode.additional?.viewName);
     setUnit(selectedNode.additional?.unit);
     setExpression(selectedNode.additional?.expression);
     setDesc(selectedNode.additional?.description);
   };
 
+  const handleEditNodeButtonClick = () => {};
+
   const handleAddNodeButtonClick = () => {
     if (newNode === null) {
       return null;
     }
 
-    const newId = getUniqueNodeID();
+    // const newId = getUniqueNodeID();
+    const newId = "5";
     const dependencyNames = extractDependencyNames(newNode);
     const node: NodeCache = {
       id: newId,
@@ -316,17 +417,22 @@ const Graph: React.FC = () => {
       expected: 0, // TODO: if user input
       dependencies: [], // TODO: calculated after
       dependencyNames: dependencyNames,
+      depth: 0, // TOOD: automatically calculated
       description: desc ? desc : "",
       isVisited: false,
     };
     if (newNode.currentValue !== undefined) {
       node.currentValue = newNode.currentValue;
     }
-    return node;
+    setNewNode(node);
   };
 
   let exampleNodes: NodeCache[] = EXAMPLE_DATA;
   const elements = createElements(exampleNodes);
+
+  useEffect(() => {
+    console.log("newNode is changed");
+  }, [newNode]);
 
   return (
     <>
