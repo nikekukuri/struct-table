@@ -193,6 +193,93 @@ const EXAMPLE_DATA: NodeCache[] = [
   },
 ];
 
+const ELEMENT_STYLE = [
+  {
+    selector: "node",
+    style: {
+      shape: "rectangle", // Set shape to rectangle (square when width equals height)
+      width: "100px", // Set width of the node
+      height: "100px", // Set height of the node
+      "background-color": "#6FB1FC",
+      label: "data(label)",
+      "text-valign": "center",
+      "text-halign": "center",
+      "font-size": "14px",
+      color: "#ffffff",
+      "text-wrap": "wrap", // Allow text to wrap within the node
+      "text-max-width": "80px", // Set maximum width for text wrapping
+    },
+  },
+  {
+    selector: "edge",
+    style: {
+      width: 3,
+      "line-color": "#ccc",
+      "target-arrow-color": "#ccc",
+      "target-arrow-shape": "triangle",
+    },
+  },
+  {
+    selector: "node:selected",
+    style: {
+      "border-width": "4px",
+      "border-color": "#FF5733",
+      "background-color": "#FFB6C1",
+      "text-outline-color": "#FF5733",
+    },
+  },
+];
+
+const createElements = (nodes: NodeCache[]) => {
+  const addedDependencyNamesNodes: NodeCache[] = [];
+  for (const node of nodes) {
+    const dependencyNames: string[] = extractDependencyNames(node);
+    const newNode = { ...node, dependencyNames: dependencyNames };
+    addedDependencyNamesNodes.push(newNode);
+  }
+
+  const addedDependenciesNodes: NodeCache[] = addDependencies(
+    addedDependencyNamesNodes,
+  );
+
+  // TODO: targetNode should be selected by user.
+  const targetNode = addedDependenciesNodes[0];
+  const graphNodes: NodeCache = makeNodeGraph(
+    targetNode,
+    addedDependenciesNodes,
+  );
+  console.log("---graphNodes---");
+  console.log(graphNodes);
+
+  const calculateadNode = calculateGraph(graphNodes);
+  console.log("---calculateadNodes---");
+  console.log(calculateadNode);
+
+  const edges: Edge[] = [];
+  for (const node of addedDependenciesNodes) {
+    const edges_tmp = createEdge(node);
+    for (const edge of edges_tmp) {
+      edges.push(edge);
+    }
+  }
+  console.log("---edges---");
+  console.log(edges);
+
+  const nodesFromGraph: Node[] = formatNodefromCacheTree(calculateadNode);
+  console.log("---nodesFromGraph---");
+  console.log(nodesFromGraph);
+
+  const elements = [];
+  for (const node of nodesFromGraph) {
+    elements.push(node);
+  }
+  for (const edge of edges) {
+    elements.push(edge);
+  }
+
+  return elements;
+};
+
 const Graph: React.FC = () => {
   const [newNode, setNewNode] = useState<NodeCache | null>(null);
   const [name, setName] = useState("");
@@ -210,41 +297,6 @@ const Graph: React.FC = () => {
     setExpression(selectedNode.additional?.expression);
     setDesc(selectedNode.additional?.description);
   };
-
-  // Make tree construction from the nodes.
-  let exampleNodes: NodeCache[] = EXAMPLE_DATA;
-
-  const addedDependencyNamesNodes: NodeCache[] = [];
-  for (const node of exampleNodes) {
-    const dependencyNames: string[] = extractDependencyNames(node);
-    const newNode = { ...node, dependencyNames: dependencyNames };
-    addedDependencyNamesNodes.push(newNode);
-  }
-
-  const addedDependenciesNodes: NodeCache[] = addDependencies(
-    addedDependencyNamesNodes,
-  );
-
-  const edges: Edge[] = [];
-  for (const node of addedDependenciesNodes) {
-    const edges_tmp = createEdge(node);
-    for (const edge of edges_tmp) {
-      edges.push(edge);
-    }
-  }
-
-  // TODO: targetNode should be selected by user.
-  const targetNode = addedDependenciesNodes[0];
-  const graphNodes: NodeCache = makeNodeGraph(
-    targetNode,
-    addedDependenciesNodes,
-  );
-  console.log("---graphNodes---");
-  console.log(graphNodes);
-
-  const calculateadNode = calculateGraph(graphNodes);
-  console.log("---calculateadNodes---");
-  console.log(calculateadNode);
 
   const handleAddNodeButtonClick = () => {
     if (newNode === null) {
@@ -273,55 +325,8 @@ const Graph: React.FC = () => {
     return node;
   };
 
-  const nodesFromGraph: Node[] = formatNodefromCacheTree(calculateadNode);
-  console.log("---nodesFromGraph---");
-  console.log(nodesFromGraph);
-
-  const elements = [];
-
-  for (const node of nodesFromGraph) {
-    elements.push(node);
-  }
-  for (const edge of edges) {
-    elements.push(edge);
-  }
-
-  const style = [
-    {
-      selector: "node",
-      style: {
-        shape: "rectangle", // Set shape to rectangle (square when width equals height)
-        width: "100px", // Set width of the node
-        height: "100px", // Set height of the node
-        "background-color": "#6FB1FC",
-        label: "data(label)",
-        "text-valign": "center",
-        "text-halign": "center",
-        "font-size": "14px",
-        color: "#ffffff",
-        "text-wrap": "wrap", // Allow text to wrap within the node
-        "text-max-width": "80px", // Set maximum width for text wrapping
-      },
-    },
-    {
-      selector: "edge",
-      style: {
-        width: 3,
-        "line-color": "#ccc",
-        "target-arrow-color": "#ccc",
-        "target-arrow-shape": "triangle",
-      },
-    },
-    {
-      selector: "node:selected",
-      style: {
-        "border-width": "4px",
-        "border-color": "#FF5733",
-        "background-color": "#FFB6C1",
-        "text-outline-color": "#FF5733",
-      },
-    },
-  ];
+  let exampleNodes: NodeCache[] = EXAMPLE_DATA;
+  const elements = createElements(exampleNodes);
 
   return (
     <>
@@ -333,7 +338,7 @@ const Graph: React.FC = () => {
           cy={(cy) => {
             cy.on("select", "node", handleNodeSelection);
           }}
-          stylesheet={style}
+          stylesheet={ELEMENT_STYLE}
         />
         <div className="items-center justify-center min-h-screen">
           <FormGroup className="p-8 by-gray-100 rounded-md">
@@ -372,6 +377,13 @@ const Graph: React.FC = () => {
                 onChange={(e) => setDesc(e.target.value)}
               ></InputGroup>
             </div>
+            <Button
+              intent="success"
+              onClick={handleAddNodeButtonClick}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Edit
+            </Button>
             <Button
               intent="success"
               onClick={handleAddNodeButtonClick}
