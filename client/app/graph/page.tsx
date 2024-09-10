@@ -277,12 +277,14 @@ const createElements = (nodes: Node[]) => {
 };
 
 const Graph: React.FC = () => {
-  const [newNode, setNewNode] = useState<Node | null>(null);
   const [name, setName] = useState("");
   const [viewName, setViewName] = useState<string | undefined>("");
   const [unit, setUnit] = useState<string | undefined>("");
   const [expression, setExpression] = useState<string | undefined>("");
   const [desc, setDesc] = useState<string | undefined>("");
+  const [elements, setElements] = useState<(Node | Edge)[]>([]);
+
+  const [nodesData, setNodesData] = useState<Data[]>(EXAMPLE_DATA);
 
   const handleNodeSelection = (e: any) => {
     const selectedNode = e.target._private.data;
@@ -295,25 +297,54 @@ const Graph: React.FC = () => {
     setDesc(selectedNode.info.description);
   };
 
-  const handleEditNodeButtonClick = () => {};
-
-  const handleAddNodeButtonClick = () => {};
-
-  let exampleNodesData: Data[] = EXAMPLE_DATA;
-  const exampleNodes: Node[] = [];
-  for (const data of exampleNodesData) {
+  // let exampleNodesData: Data[] = EXAMPLE_DATA;
+  // let nodesData = exampleNodesData;
+  const nodes: Node[] = [];
+  for (const data of nodesData) {
     const node: Node = {
       group: "nodes",
       data: data,
     }
-    exampleNodes.push(node);
+    nodes.push(node);
   }
 
-  const elements = createElements(exampleNodes);
+  const elementFromNode = () => {
+    console.log("hoge");
+    const nodes: Node[] = [];
+    for (const data of nodesData) {
+      const node: Node = {
+        group: "nodes",
+        data: data,
+      }
+      nodes.push(node);
+    }
 
-  useEffect(() => {
-    console.log("newNode is changed");
-  }, [newNode]);
+    const elements = createElements(nodes);
+    setElements(elements);
+  }
+
+  useEffect(elementFromNode, []);
+  useEffect(elementFromNode, [nodesData]);
+
+  const handleEditNodeButtonClick = () => {
+    const targetName = name;
+    const targetNodeIdx = nodesData.findIndex((data) => data.info.name === targetName);
+
+    if (targetNodeIdx !== -1) {
+      const updatedNodesData = [...nodesData];
+      updatedNodesData[targetNodeIdx].info.name = name;
+      updatedNodesData[targetNodeIdx].info.viewName = viewName;
+      updatedNodesData[targetNodeIdx].info.unit = unit;
+      updatedNodesData[targetNodeIdx].info.expression = expression;
+      updatedNodesData[targetNodeIdx].info.description = desc;
+      setNodesData(updatedNodesData);
+    }
+    console.log("nodesData");
+    console.log(nodesData);
+  };
+
+  const handleAddNodeButtonClick = () => {};
+
 
   return (
     <>
