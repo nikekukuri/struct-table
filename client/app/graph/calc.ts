@@ -3,16 +3,12 @@ import { Node } from "./page";
 
 export const calculateGraph = (node: Node): Node => {
   const filledEdgesNode: Node = fillInitialValueOnEdges(node);
-  // console.log("---filledEdgesNode---");
-  // console.log(filledEdgesNode);
   const calculatedNode = calculateRecursive(filledEdgesNode);
   calculatedNode.data.info.currentValue = calculateExpression(calculatedNode);
   return calculatedNode;
 };
 
 export const calculateRecursive = (node: Node): Node => {
-  // console.log("----calculateRecursive----");
-  // console.log(node);
   const calculatedNode = { ...node };
   const dependencyNodes = [];
   for (const dependency of node.data.info.dependencies) {
