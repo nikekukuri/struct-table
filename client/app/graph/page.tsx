@@ -118,11 +118,7 @@ const formatNodefromCacheTree = (node: NodeCache): Node[] => {
 };
 
 // Unique ID generator
-const getUniqueNodeID = (nodes: NodeCache): string => {
-
-
-}
-
+const getUniqueNodeID = (nodes: NodeCache): string => {};
 
 const EXAMPLE_DATA: NodeCache[] = [
   {
@@ -200,20 +196,18 @@ const EXAMPLE_DATA: NodeCache[] = [
 const Graph: React.FC = () => {
   const [newNode, setNewNode] = useState<NodeCache | null>(null);
   const [name, setName] = useState("");
-  const [viewName, setViewName] = useState("");
-  const [value, setValue] = useState("");
-  const [unit, setUnit] = useState("");
-  const [expression, setExpression] = useState("");
-  const [desc, setDesc] = useState("");
+  const [viewName, setViewName] = useState<string | undefined>("");
+  const [unit, setUnit] = useState<string | undefined>("");
+  const [expression, setExpression] = useState<string | undefined>("");
+  const [desc, setDesc] = useState<string | undefined>("");
 
   const handleNodeSelection = (e: any) => {
-    const node = e.target;
-    setName(node.data.id);
-    setViewName(node.additional.viewName);
-    setValue(node.additional.value);
-    setUnit(node.additional.unit);
-    setExpression(node.additional.expression);
-    setDesc(node.additional.description);
+    const selectedNode: Node = e.target;
+    setName(selectedNode.data.id);
+    setViewName(selectedNode.additional?.viewName);
+    setUnit(selectedNode.additional?.unit);
+    setExpression(selectedNode.additional?.expression);
+    setDesc(selectedNode.additional?.description);
   };
 
   // Make tree construction from the nodes.
@@ -261,17 +255,17 @@ const Graph: React.FC = () => {
     const node: NodeCache = {
       id: newId,
       name: name,
-      viewName: viewName,
-      expression: expression,
-      unit: unit,
+      viewName: viewName ? viewName : "",
+      expression: expression ? expression : "",
+      unit: unit ? unit : "",
       status: "",
       initValue: 0, // TODO: automatically calculated
       expected: 0, // TODO: if user input
-      dependencies: [], // TODO: calculaterd after
+      dependencies: [], // TODO: calculated after
       dependencyNames: dependencyNames,
-      description: desc,
+      description: desc ? desc : "",
       isVisited: false,
-    }
+    };
     if (newNode.currentValue !== undefined) {
       node.currentValue = newNode.currentValue;
     }
@@ -354,13 +348,6 @@ const Graph: React.FC = () => {
               <InputGroup
                 value={viewName}
                 onChange={(e) => setViewName(e.target.value)}
-              ></InputGroup>
-            </div>
-            <div className="mb-4">
-              <label>value</label>
-              <InputGroup
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
               ></InputGroup>
             </div>
             <div className="mb-4">
