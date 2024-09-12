@@ -56,6 +56,17 @@ const ELEMENT_STYLE = [
       "text-outline-color": "#FF5733",
     },
   },
+  {
+    selector: ".highlighted",
+    style: {
+      "background-color": "#FF5733",
+      "line-color": "#61bffc",
+      "target-arrow-color": "#61bffc",
+      "source-arrow-color": "#61bffc",
+      "transition-property": "background-color, line-color, target-arrow-color, source-arrow-color",
+      "transition-duration": "0.5s",
+    },
+  }
 ];
 
 const extractNodes = (edges: EdgeData[]): string[] => {
@@ -123,7 +134,17 @@ const Relate: React.FC = () => {
           elements={elements}
           style={{ width: "2000px", height: "600px" }}
           cy={(cy) => {
-            //cy.on("select", "node", handleNodeSelection);
+            cy.on("tap", "node", (evt) => {
+              const node = evt.target;
+              
+              cy.elements().removeClass("highlighted");
+
+              const connectedEdges = node.connectedEdges();
+              connectedEdges.addClass("highlighted");
+
+              const connectedNodes = connectedEdges.connectedNodes();
+              connectedNodes.addClass("highlighted");
+            });
           }}
           stylesheet={ELEMENT_STYLE}
         />
