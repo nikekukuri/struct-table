@@ -82,6 +82,8 @@ const extractNodes = (edges: EdgeData[]): string[] => {
 const Relate: React.FC = () => {
   const [csvData, setCsvData] = useState<EdgeData[]>([]);
   const [elements, setElements] = useState<(Edge | Node)[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
 
   const handleCsvData = (data: EdgeData[]) => {
     setCsvData(data);
@@ -122,6 +124,23 @@ const Relate: React.FC = () => {
     setElements(newElements);
   }, [csvData]);
 
+  const handleSearch = (cy: any) => {
+    const targetNode = cy.getElementById(searchTerm);
+    if (targetNode.length > 0) {
+      cy.elements().removeClass("highlighted");
+
+      const connectedEdges = targetNode.connectedEdges();
+      connectedEdges.addClass("highlighted");
+
+      const connectedNodes = connectedEdges.connectedNodes();
+      connectedNodes.addClass("highlighted");
+
+      cy.center(targetNode);
+    } else {
+      alert("Node not found");
+    }
+  };
+
   return (
     <>
       <div>
@@ -130,6 +149,16 @@ const Relate: React.FC = () => {
       </div>
       <div>
         <h1>GraphView</h1>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search for node by ID"
+            className="mr-4"
+        />
+        <button onClick={() => handleSearch(cy)} className="px-4 py-2 bg-blue-500 text-white rounded">
+        Search
+        </button>
         <CytoscapeComponent
           elements={elements}
           style={{ width: "2000px", height: "600px" }}
@@ -145,6 +174,7 @@ const Relate: React.FC = () => {
               const connectedNodes = connectedEdges.connectedNodes();
               connectedNodes.addClass("highlighted");
             });
+            window.cy = cy;
           }}
           stylesheet={ELEMENT_STYLE}
         />
