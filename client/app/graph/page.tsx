@@ -19,7 +19,7 @@ export interface Node {
 
 export interface Edge {
   group: "edges";
-  data: Data;
+  data: EdgeData;
 }
 
 export interface Data {
@@ -33,6 +33,7 @@ export interface EdgeData {
   label?: string;
   source: string;
   target: string;
+  value?: number;
 }
 
 interface Info {
