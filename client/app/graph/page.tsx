@@ -3,13 +3,14 @@
 import CytoscapeComponent from "react-cytoscapejs";
 import { useState, useEffect } from "react";
 import { Button, InputGroup } from "@blueprintjs/core";
+import { FormGroup } from "@blueprintjs/core";
 import {
   addDependencies,
   extractDependencyNames,
   makeNodeGraph,
 } from "./parse";
 import { calculateGraph } from "./calc";
-import { FormGroup } from "@blueprintjs/core";
+import { CsvReader } from "../components/ImportCsv";
 
 export interface Node {
   group: "nodes";
@@ -50,6 +51,23 @@ interface Info {
   depth: number;
   description: string;
   isVisited: boolean;
+}
+
+interface Csv {
+  id: string;
+  name: string;
+  viewName: string;
+  expression: string;
+  unit: string;
+  status: string;
+  // currentValue?: number;
+  initValue: number;
+  expected: number;
+  dependencies: Node[];
+  dependencyNames: string[];
+  depth: number;
+  description: string;
+  // isVisited: boolean;
 }
 
 const createEdge = (node: Node): Edge[] => {
@@ -385,8 +403,37 @@ const Graph: React.FC = () => {
     setNodesData(updatedData);
   };
 
+  const handleCsvData = (data: Csv[]) => {
+    const newNodesData: Data[] = [];
+    for (const d of data) {
+      const newData: Data = {
+        id: d.id,
+        info: {
+          name: d.name,
+          viewName: d.viewName,
+          expression: d.expression ? d.expression : "",
+          unit: d.unit,
+          status: d.status,
+          initValue: d.initValue,
+          expected: d.expected,
+          dependencies: d.dependencies,
+          dependencyNames: d.dependencyNames,
+          depth: d.depth,
+          description: d.description,
+          isVisited: false,
+        },
+      };
+      newNodesData.push(newData);
+    }
+    setNodesData(newNodesData);
+  };
+
   return (
     <>
+      <div>
+        <p>select csv file</p>
+        <CsvReader onDataLoad={handleCsvData} />
+      </div>
       <div style={{ width: "2000px", height: "600px" }}>
         <h1>GraphView</h1>
         <CytoscapeComponent
@@ -457,6 +504,9 @@ const Graph: React.FC = () => {
             </Button>
           </FormGroup>
         </div>
+      </div>
+      <div>
+        <pre>{JSON.stringify(nodesData, null, 2)}</pre>
       </div>
     </>
   );
