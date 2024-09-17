@@ -11,7 +11,6 @@ import {
 } from "./parse";
 import { calculateGraph } from "./calc";
 import { CsvReader } from "../components/ImportCsv";
-import { Graph } from "../components/GraphView";
 
 export interface Node {
   group: "nodes";
@@ -310,16 +309,204 @@ const createElements = (nodes: Node[]) => {
   return elements;
 };
 
-const GraphView: React.FC = () => {
+export const Graph: React.FC = () => {
+  const [name, setName] = useState("");
+  const [viewName, setViewName] = useState<string>("");
+  const [initValue, setInitValue] = useState<number>(0);
+  const [expression, setExpression] = useState<string>("");
+  const [unit, setUnit] = useState<string>("");
+  const [desc, setDesc] = useState<string>("");
+
+  const [elements, setElements] = useState<(Node | Edge)[]>([]);
+  const [nodesData, setNodesData] = useState<Data[]>(EXAMPLE_DATA);
+
+  const handleNodeSelection = (e: any) => {
+    const selectedNode = e.target._private.data;
+    console.log("---selectedNode---");
+    console.log(selectedNode);
+    setName(selectedNode.info.name);
+    setViewName(selectedNode.info.viewName);
+    setInitValue(selectedNode.info.initValue);
+    setUnit(selectedNode.info.unit);
+    setExpression(selectedNode.info.expression);
+    setDesc(selectedNode.info.description);
+  };
+
+  const nodes: Node[] = [];
+  for (const data of nodesData) {
+    const node: Node = {
+      group: "nodes",
+      data: data,
+    };
+    nodes.push(node);
+  }
+
+  const elementFromNode = () => {
+    const nodes: Node[] = [];
+    for (const data of nodesData) {
+      const node: Node = {
+        group: "nodes",
+        data: data,
+      };
+      nodes.push(node);
+    }
+
+    const elements = createElements(nodes);
+    setElements(elements);
+  };
+
+  useEffect(elementFromNode, []);
+  useEffect(elementFromNode, [nodesData]);
+
+  const handleEditNodeButtonClick = () => {
+    const targetName = name;
+    const targetNodeIdx = nodesData.findIndex(
+      (data) => data.info.name === targetName,
+    );
+
+    if (targetNodeIdx !== -1) {
+      const updatedNodesData = [...nodesData];
+      updatedNodesData[targetNodeIdx].info.name = name;
+      updatedNodesData[targetNodeIdx].info.viewName = viewName;
+      updatedNodesData[targetNodeIdx].info.initValue = initValue;
+      updatedNodesData[targetNodeIdx].info.unit = unit;
+      updatedNodesData[targetNodeIdx].info.expression = expression;
+      updatedNodesData[targetNodeIdx].info.description = desc;
+      setNodesData(updatedNodesData);
+    }
+    console.log("nodesData");
+    console.log(nodesData);
+  };
+
+  const handleAddNodeButtonClick = () => {
+    const id = getUniqueNodeID(nodesData);
+    // TODO: properties should be selected by user.
+    const newData: Data = {
+      id: id,
+      info: {
+        name: name,
+        viewName: viewName,
+        expression: expression,
+        unit: unit,
+        status: "calc",
+        initValue: 0,
+        expected: 0,
+        dependencies: [],
+        dependencyNames: [],
+        depth: 0,
+        description: desc,
+        isVisited: false,
+      },
+    };
+
+    const updatedData = [...nodesData, newData];
+    setNodesData(updatedData);
+  };
+
+  const handleCsvData = (data: Csv[]) => {
+    const newNodesData: Data[] = [];
+    for (const d of data) {
+      const newData: Data = {
+        id: d.id,
+        info: {
+          name: d.name,
+          viewName: d.viewName,
+          expression: d.expression ? d.expression : "",
+          unit: d.unit,
+          status: d.status,
+          initValue: d.initValue,
+          expected: d.expected,
+          dependencies: d.dependencies,
+          dependencyNames: d.dependencyNames,
+          depth: d.depth,
+          description: d.description,
+          isVisited: false,
+        },
+      };
+      newNodesData.push(newData);
+    }
+    setNodesData(newNodesData);
+  };
+
   return (
     <>
-    <div className="flex space-x-4">
-      <div className="bg-white p-4 border border-gray-300 rounded"><Graph /></div>
-      <div className="bg-white p-4 border border-gray-300 rounded"><Graph /></div>
-      
-    </div>
+      <div>
+        <CsvReader onDataLoad={handleCsvData} />
+      </div>
+      <h1>GraphView</h1>
+      <div style={{ width: "1200px", height: "600px" }} className="border border-black rounded-lg p-4">
+        <CytoscapeComponent
+          elements={elements}
+          style={{ width: "1200px", height: "600px" }}
+          cy={(cy) => {
+            cy.on("select", "node", handleNodeSelection);
+          }}
+          stylesheet={ELEMENT_STYLE}
+        />
+        <div className="items-center justify-center min-h-screen">
+          <FormGroup className="p-8 by-gray-100 rounded-md">
+            <div className="mb-4">
+              <label>name</label>
+              <InputGroup
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              ></InputGroup>
+            </div>
+            <div className="mb-4">
+              <label>view name</label>
+              <InputGroup
+                value={viewName}
+                onChange={(e) => setViewName(e.target.value)}
+              ></InputGroup>
+            </div>
+            <div className="mb-4">
+              <label>initial value</label>
+              <InputGroup
+                value={initValue}
+                onChange={(e) => setInitValue(e.target.value)}
+              ></InputGroup>
+            </div>
+            <div className="mb-4">
+              <label>expression</label>
+              <InputGroup
+                value={expression}
+                onChange={(e) => setExpression(e.target.value)}
+              ></InputGroup>
+            </div> <div className="mb-4">
+              <label>unit</label>
+              <InputGroup
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+              ></InputGroup>
+            </div>
+            <div className="mb-4">
+              <label>Description</label>
+              <InputGroup
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+              ></InputGroup>
+            </div>
+            <div className="flex space-x-4">
+            <Button
+              intent="success"
+              onClick={handleEditNodeButtonClick}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Edit
+            </Button>
+            <Button
+              intent="success"
+              onClick={handleAddNodeButtonClick}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Add
+            </Button>
+            </div>
+          </FormGroup>
+        </div>
+      </div>
     </>
   );
 };
 
-export default GraphView;
+export default Graph;
