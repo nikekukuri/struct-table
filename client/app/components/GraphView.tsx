@@ -194,7 +194,10 @@ const ELEMENT_STYLE = [
     selector: "node",
     style: {
       shape: "rectangle", // Set shape to rectangle (square when width equals height)
-      width: "100px", // Set width of the node
+      "border-width": "2px",
+      "border-color": "gray",
+      "border-cap": "round",
+      width: "200px", // Set width of the node
       height: "100px", // Set height of the node
       "background-color": "#6FB1FC",
       label: "data(label)",
@@ -251,7 +254,8 @@ const addPosition = (node: Node): Node => {
 };
 
 const addLabel = (node: Node): Node => {
-  const lable = `${node.data.info.name}\n${node.data.info.viewName}\n${node.data.info.expression} = ${node.data.info.currentValue} ${node.data.info.unit}\nexpected: ${node.data.info?.expected} ${node.data.info.unit}`;
+  //const lable = `${node.data.info.name}\n${node.data.info.viewName}\n${node.data.info.expression} = ${node.data.info.currentValue} ${node.data.info.unit}\nexpected: ${node.data.info?.expected} ${node.data.info.unit}`;
+  const lable = `${node.data.info.name}\n${node.data.info.viewName}\n${node.data.info.expression} = ${node.data.info.currentValue} ${node.data.info.unit}`;
   return {
     ...node,
     data: {
@@ -434,7 +438,10 @@ export const Graph: React.FC = () => {
         <CsvReader onDataLoad={handleCsvData} />
       </div>
       <h1>GraphView</h1>
-      <div style={{ width: "1200px", height: "600px" }} className="border border-black rounded-lg p-4">
+      <div
+        style={{ width: "1200px", height: "600px" }}
+        className="border border-black rounded-lg p-4"
+      >
         <CytoscapeComponent
           elements={elements}
           style={{ width: "1200px", height: "600px" }}
@@ -472,7 +479,8 @@ export const Graph: React.FC = () => {
                 value={expression}
                 onChange={(e) => setExpression(e.target.value)}
               ></InputGroup>
-            </div> <div className="mb-4">
+            </div>{" "}
+            <div className="mb-4">
               <label>unit</label>
               <InputGroup
                 value={unit}
@@ -487,20 +495,20 @@ export const Graph: React.FC = () => {
               ></InputGroup>
             </div>
             <div className="flex space-x-4">
-            <Button
-              intent="success"
-              onClick={handleEditNodeButtonClick}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Edit
-            </Button>
-            <Button
-              intent="success"
-              onClick={handleAddNodeButtonClick}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Add
-            </Button>
+              <Button
+                intent="success"
+                onClick={handleEditNodeButtonClick}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Edit
+              </Button>
+              <Button
+                intent="success"
+                onClick={handleAddNodeButtonClick}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Add
+              </Button>
             </div>
           </FormGroup>
         </div>
