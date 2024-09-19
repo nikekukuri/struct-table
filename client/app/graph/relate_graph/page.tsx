@@ -8,7 +8,7 @@ import { CsvReader } from "../../components/ImportCsv";
 
 export interface Node {
   group: "nodes";
-  data: Table;
+  data: Record;
   position?: { x: number; y: number };
 }
 
@@ -17,13 +17,23 @@ export interface Edge {
   data: Relation;
 }
 
-interface Table {
+interface Record {
   id: string,
   label: string,
   layer: number,
   criteria: Criteria,
   description: string,
-  conditions: Condition,
+  conditions?: Condition,
+}
+
+interface Csv {
+  id: string,
+  label: string,
+  layer: number,
+  criteriaValue: number,
+  criteriaJudge: string,
+  description: string,
+  conditions?: Condition,
 }
 
 interface Criteria {
@@ -47,7 +57,7 @@ interface Relation {
   target: string,
 }
 
-const EX_PARENT_TABLE: Table[] = [
+const EX_PARENT_TABLE: Record[] = [
   {
     id: "p0",
     label: "foo",
@@ -102,7 +112,7 @@ const EX_PARENT_TABLE: Table[] = [
   },
 ];
 
-const EX_CHILD_TABLE: Table[] = [
+const EX_CHILD_TABLE: Record[] = [
   {
     id: "c0",
     label: "child foo",
@@ -224,7 +234,7 @@ const ELEMENT_STYLE = [
   },
 ];
 
-const createElementsByTable = (table: Table[]) => {
+const createElementsByRecord = (table: Record[]) => {
   const elements = [];
   for (const t of table) {
     const node: Node = {
@@ -264,10 +274,11 @@ const createElementsByRelation = (relations: Relation[]) => {
 }
 
 const TableRelation: React.FC = () => {
+  const [record, setRecord] = useState<Record[]>([]);
 
   const elements = [];
-  elements.push(...createElementsByTable(EX_PARENT_TABLE));
-  elements.push(...createElementsByTable(EX_CHILD_TABLE));
+  elements.push(...createElementsByRecord(EX_PARENT_TABLE));
+  elements.push(...createElementsByRecord(EX_CHILD_TABLE));
   elements.push(...createElementsByRelation(EX_RELATION));
 
   const handleNodeSelection = (e: any) => {
@@ -278,39 +289,29 @@ const TableRelation: React.FC = () => {
 
   console.log(elements);
 
-
-  /* const handleCsvData = (data: Csv[]) => {
-    const newNodesData: Data[] = [];
-    for (const d of data) {
-      const newData: Data = {
-        id: d.id,
-        info: {
-          name: d.name,
-          viewName: d.viewName,
-          expression: d.expression ? d.expression : "",
-          unit: d.unit,
-          status: d.status,
-          initValue: d.initValue,
-          expected: d.expected,
-          dependencies: d.dependencies,
-          dependencyNames: d.dependencyNames,
-          depth: d.depth,
-          description: d.description,
-          isVisited: false,
+  const handleCsvData = (records: Csv[]) => {
+    const newRecords: Record[] = [];
+    for (const r of records) {
+      const newRecord: Record = {
+        id: r.id,
+        label: r.label,
+        layer: r.layer,
+        criteria: {
+          value: r.criteriaValue,
+          judge: r.criteriaJudge === "<" ? Judge.Less : Judge.Greater,
         },
+        description: r.description,
       };
-      newNodesData.push(newData);
+      newRecords.push(newRecord);
     }
-    setNodesData(newNodesData);
-  }; */
+    setRecord(newRecords);
+  };
 
   return (
     <>
-    {
-      /* <div>
+      <div>
         <CsvReader onDataLoad={handleCsvData} />
-      </div> */
-    }
+      </div>
       <h1>GraphView</h1>
       <div
         style={{ width: "1200px", height: "600px" }}
