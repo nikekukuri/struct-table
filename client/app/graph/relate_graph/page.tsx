@@ -26,7 +26,7 @@ interface Record {
   conditions?: Condition,
 }
 
-interface Csv {
+interface RecordsCsv {
   id: string,
   label: string,
   layer: number,
@@ -35,6 +35,11 @@ interface Csv {
   description: string,
   conditions?: Condition,
 }
+
+interface RelationsCsv {
+  // TODO : Implement
+}
+
 
 interface Criteria {
   value: number,
@@ -234,9 +239,9 @@ const ELEMENT_STYLE = [
   },
 ];
 
-const createElementsByRecord = (table: Record[]) => {
+const createElementsByRecord = (records: Record[]) => {
   const elements = [];
-  for (const t of table) {
+  for (const t of records) {
     const node: Node = {
       group: "nodes",
       data: t,
@@ -274,12 +279,28 @@ const createElementsByRelation = (relations: Relation[]) => {
 }
 
 const TableRelation: React.FC = () => {
-  const [record, setRecord] = useState<Record[]>([]);
+  const [label, setLabel] = useState<string>("");
+  const [layer, setLayer] = useState<number | undefined>();
+  const [criteria, setCriteria] = useState<Criteria | undefined>();
+  const [description, setDescription] = useState<string>("");
+  const [elements, setElements] = useState<(Node | Edge)[]>([]);
 
-  const elements = [];
+  const [records, setRecord] = useState<Record[]>([]);
+  const [relations, setRelation] = useState<Relation[]>([]);
+
   elements.push(...createElementsByRecord(EX_PARENT_TABLE));
   elements.push(...createElementsByRecord(EX_CHILD_TABLE));
   elements.push(...createElementsByRelation(EX_RELATION));
+
+  const createElements = () => {
+    const elements = [];
+    elements.push(...createElementsByRecord(records));
+    elements.push(...createElementsByRelation(relations));
+    console.log(elements);
+    setElements(elements);
+  };
+
+  useEffect(createElements, [records, relations]);
 
   const handleNodeSelection = (e: any) => {
     const selectedNode = e.target._private.data;
@@ -289,7 +310,7 @@ const TableRelation: React.FC = () => {
 
   console.log(elements);
 
-  const handleCsvData = (records: Csv[]) => {
+  const handleRecordsCsvData = (records: RecordsCsv[]) => {
     const newRecords: Record[] = [];
     for (const r of records) {
       const newRecord: Record = {
@@ -307,10 +328,24 @@ const TableRelation: React.FC = () => {
     setRecord(newRecords);
   };
 
+  // TODO: Implement
+  const handleRelationsCsvData = (relations: RelationsCsv[]) => {
+    // Relation handler
+    const newRelation: Relation[] = [];
+    setRelation(newRelation);
+  };
+
   return (
     <>
-      <div>
-        <CsvReader onDataLoad={handleCsvData} />
+      <div className="flex space-x-12">
+        <div>
+          <h1>Import Records CSV</h1>
+          <CsvReader onDataLoad={handleRecordsCsvData} />
+        </div>
+        <div>
+          <h1>Import Relation CSV</h1>
+          <CsvReader onDataLoad={handleRelationsCsvData} />
+        </div>
       </div>
       <h1>GraphView</h1>
       <div
@@ -325,51 +360,30 @@ const TableRelation: React.FC = () => {
           }}
           stylesheet={ELEMENT_STYLE}
         />
-        {/* <div className="items-center justify-center min-h-screen">
+        <div className="items-center justify-center min-h-screen">
           <FormGroup className="p-8 by-gray-100 rounded-md">
             <div className="mb-4">
-              <label>name</label>
+              <label>lable</label>
               <InputGroup
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
               ></InputGroup>
             </div>
             <div className="mb-4">
-              <label>view name</label>
+              <label>layer</label>
               <InputGroup
-                value={viewName}
-                onChange={(e) => setViewName(e.target.value)}
-              ></InputGroup>
-            </div>
-            <div className="mb-4">
-              <label>initial value</label>
-              <InputGroup
-                value={initValue}
-                onChange={(e) => setInitValue(e.target.value)}
-              ></InputGroup>
-            </div>
-            <div className="mb-4">
-              <label>expression</label>
-              <InputGroup
-                value={expression}
-                onChange={(e) => setExpression(e.target.value)}
-              ></InputGroup>
-            </div>{" "}
-            <div className="mb-4">
-              <label>unit</label>
-              <InputGroup
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
+                value={layer ? layer.toString() : ""}
+                onChange={(e) => setLayer(e.target.value)}
               ></InputGroup>
             </div>
             <div className="mb-4">
               <label>Description</label>
               <InputGroup
-                value={desc}
-                onChange={(e) => setDesc(e.target.value)}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               ></InputGroup>
             </div>
-            <div className="flex space-x-4">
+            {/* <div className="flex space-x-4">
               <Button
                 intent="success"
                 onClick={handleEditNodeButtonClick}
@@ -384,9 +398,16 @@ const TableRelation: React.FC = () => {
               >
                 Add
               </Button>
-            </div>
+            </div> */}
           </FormGroup>
-        </div> */}
+        </div>
+        <div>
+          <h1>Debugging JSON Data</h1>
+          <h2>records</h2>
+          <pre>{JSON.stringify(records, null, 2)}</pre>
+          <h2>relation</h2>
+          <pre>{JSON.stringify(relations, null, 2)}</pre>
+        </div>
       </div>
     </>
   )
