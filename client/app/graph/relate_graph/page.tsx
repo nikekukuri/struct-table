@@ -5,6 +5,15 @@ import { useState, useEffect } from "react";
 import { Button, InputGroup } from "@blueprintjs/core";
 import { FormGroup } from "@blueprintjs/core";
 import { CsvReader } from "../../components/ImportCsv";
+import { TableView, RelationTableProps } from "../../components/table";
+
+interface List {
+  elements: Record[] | Relation[];
+  type: "record" | "relation";
+  layer: number;
+  source?: string;
+  target?: string;
+}
 
 export interface Node {
   group: "nodes";
@@ -35,11 +44,6 @@ interface RecordsCsv {
   description: string,
   conditions?: Condition,
 }
-
-interface RelationsCsv {
-  // TODO : Implement
-}
-
 
 interface Criteria {
   value: number,
@@ -185,12 +189,7 @@ const EX_RELATION: Relation[] = [
     source: "p0",
     target: "c1",
   },
-  {
-    id: "e2",
-    label: "foo -> baz",
-    source: "p0",
-    target: "c2",
-  },
+  { id: "e2", label: "foo -> baz", source: "p0", target: "c2", },
   {
     id: "e3",
     label: "foo -> hoge",
@@ -278,6 +277,55 @@ const createElementsByRelation = (relations: Relation[]) => {
   return elements;
 }
 
+const TABLE_DATA: RelationTableProps = {
+  parentCols: ["A-1", "A-2", "A-3", "A-4", "A-5"],
+  childCols: ["B-1", "B-2", "B-3", "B-4", "B-5"],
+  data: [
+    ["○", "○", "○", "○", "○"],
+    ["○", "-", "○", "○", "○"],
+    ["-", "○", "◎", "○", "○"],
+    ["○", "○", "○", "-", "○"],
+    ["○", "◎", "○", "○", "○"],
+  ]
+};
+
+const makeRelationByTable = ({ parentCols, childCols, data }: RelationTableProps): Relation[] => {
+  const newRelations: Relation[] = [];
+  // valilate data
+  if (parentCols.length !== data.length) {
+    throw new Error("parentCols.length !== data.length");
+  }
+  if (childCols.length !== data[0].length) {
+    throw new Error("childCols.length !== data[0].length");
+  }
+
+  for (let i = 0; i < parentCols.length; i++) {
+    for (let j = 0; j < childCols.length; j++) {
+      const relation: Relation = {
+        id: `${parentCols[i]}-${childCols[j]}`,
+        source: `p${i}`,
+        target: `c${j}`,
+      };
+      newRelations.push(relation);
+    }
+  }
+
+  return newRelations;
+};
+
+const csvToRelationTable = (csv: string): RelationTableProps => {
+  const rows = csv.trim().split('\r\n').map(row => row.split(',')); //TODO: error handling depend on file types.
+  const parentCols = rows[0].slice(1);
+  const childCols = rows.slice(1).map(row => row[0]);
+  const data = rows.slice(1).map(row => row.slice(1));
+
+  return {
+    parentCols,
+    childCols,
+    data
+  };
+};
+
 const TableRelation: React.FC = () => {
   const [label, setLabel] = useState<string>("");
   const [layer, setLayer] = useState<number | undefined>();
@@ -285,17 +333,45 @@ const TableRelation: React.FC = () => {
   const [description, setDescription] = useState<string>("");
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
 
+  const [selectedElement, setSelectedElement] = useState<Node | Edge | null>(null);
+
   const [records, setRecord] = useState<Record[]>([]);
   const [relations, setRelation] = useState<Relation[]>([]);
+
+  const [source, setSource] = useState<string>("");
+  const [target, setTarget] = useState<string>("");
+
+  const [lists, setLists] = useState<List[]>([]);
 
   elements.push(...createElementsByRecord(EX_PARENT_TABLE));
   elements.push(...createElementsByRecord(EX_CHILD_TABLE));
   elements.push(...createElementsByRelation(EX_RELATION));
 
+  lists.push({
+    elements: EX_PARENT_TABLE,
+    type: "record",
+    layer: 1,
+  })
+
+  lists.push({
+    elements: EX_CHILD_TABLE,
+    type: "record",
+    layer: 2,
+  })
+
+  lists.push({
+    elements: EX_RELATION,
+    type: "relation",
+    layer: 1,
+  })
+
   const createElements = () => {
     const elements = [];
     elements.push(...createElementsByRecord(records));
     elements.push(...createElementsByRelation(relations));
+    console.log('lists');
+    console.log(lists);
+    console.log('elements');
     console.log(elements);
     setElements(elements);
   };
@@ -306,15 +382,21 @@ const TableRelation: React.FC = () => {
     const selectedNode = e.target._private.data;
     console.log("---selectedNode---");
     console.log(selectedNode);
+    setSelectedElement(selectedNode);
   };
 
-  console.log(elements);
+  const handleEdgeSelection = (e: any) => {
+    const selectedEdge = e.target._private.data;
+    console.log("---selectedEdge---");
+    console.log(selectedEdge);
+    setSelectedElement(selectedEdge);
+  };
 
   const handleRecordsCsvData = (records: RecordsCsv[]) => {
     const newRecords: Record[] = [];
     for (const r of records) {
       const newRecord: Record = {
-        id: r.id,
+        id: r.id.toString(),
         label: r.label,
         layer: r.layer,
         criteria: {
@@ -328,42 +410,144 @@ const TableRelation: React.FC = () => {
     setRecord(newRecords);
   };
 
-  // TODO: Implement
-  const handleRelationsCsvData = (relations: RelationsCsv[]) => {
-    // Relation handler
-    const newRelation: Relation[] = [];
-    setRelation(newRelation);
+  const handleRelationFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const csv = e.target?.result as string;
+        const parsedData: RelationTableProps = csvToRelationTable(csv);
+        const newRelations: Relation[] = makeRelationByTable(parsedData);
+        setRelation(newRelations);
+      };
+
+      reader.readAsText(file);
+    }
   };
 
-  return (
-    <>
-      <div className="flex space-x-12">
+  const deleteElement = () => {
+    if (!selectedElement) {
+      return;
+    }
+
+    const selId = selectedElement.data.id;
+    const filteredElements = elements.filter((e) => e.data.id !== selId);
+
+    setElements(filteredElements);
+  }
+
+  const addElement = () => {
+    return;
+  };
+
+  const editElement = () => {
+    return;
+  };
+
+  return ( 
+    <> 
+      <div className="flex space-x-12"> 
         <div>
-          <h1>Import Records CSV</h1>
+        <h1>Import Records CSV</h1>
           <CsvReader onDataLoad={handleRecordsCsvData} />
         </div>
         <div>
           <h1>Import Relation CSV</h1>
-          <CsvReader onDataLoad={handleRelationsCsvData} />
+            <div className="flex items-center">
+              <label className="cursor-pointer text-blue-500 border border-blue-500 rounded-lg px-4 py-2 hover:bg-blue-100">
+                ファイルを選択
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleRelationFileChange}
+                  className="hidden"
+                />
+              </label>
+            </div>
         </div>
       </div>
-      <h1>GraphView</h1>
+      <div>
+        <h1 className="font-bold mt-4">Node Actions</h1>
+      </div>
+      <div className="flex space-x-4">
+        <Button
+          intent="success"
+          onClick={deleteElement}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Delete
+        </Button>
+        <Button
+          intent="success"
+          onClick={addElement}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >Add
+        </Button>
+        <Button
+          intent="success"
+          onClick={editElement}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Edit
+        </Button>
+      </div>
+      <div>
+        <h1 className="font-bold mt-4">Edge Actions</h1>
+      </div>
+      <div className="flex space-x-4">
+        <Button
+          intent="success"
+          onClick={deleteElement}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Delete
+        </Button>
+        <Button
+          intent="success"
+          onClick={addElement}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >Add
+        </Button>
+        <Button
+          intent="success"
+          onClick={editElement}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Edit
+        </Button>
+        <input
+        type="text"
+        placeholder="source"
+        className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        onChange={(e) => setSource(e.target.value)}
+        />
+        <input
+        type="text"
+        placeholder="target"
+        className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        onChange={(e) => setTarget(e.target.value)}
+        />
+      </div>
+      <h1 className="mt-4">GraphView</h1>
       <div
-        style={{ width: "1200px", height: "600px" }}
+        style={{ width: "2000px", height: "1000px" }}
         className="border border-black rounded-lg p-4"
       >
         <CytoscapeComponent
           elements={elements}
-          style={{ width: "1200px", height: "600px" }}
+          style={{ width: "2000px", height: "1000px" }}
           cy={(cy) => {
             cy.on("select", "node", handleNodeSelection);
+            cy.on("select", "edge", handleEdgeSelection);
           }}
           stylesheet={ELEMENT_STYLE}
         />
         <div className="items-center justify-center min-h-screen">
           <FormGroup className="p-8 by-gray-100 rounded-md">
             <div className="mb-4">
-              <label>lable</label>
+              <label>label</label>
               <InputGroup
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
@@ -400,6 +584,9 @@ const TableRelation: React.FC = () => {
               </Button>
             </div> */}
           </FormGroup>
+        </div>
+        <div>
+          <TableView parentCols={TABLE_DATA.parentCols} childCols={TABLE_DATA.childCols} data={TABLE_DATA.data} />
         </div>
         <div>
           <h1>Debugging JSON Data</h1>
