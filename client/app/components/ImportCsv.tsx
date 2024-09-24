@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import CytoscapeComponent from "react-cytoscapejs";
 import Papa from "papaparse";
 
 interface CsvData {
@@ -39,8 +38,16 @@ export const CsvReader: React.FC<CsvReaderProps> = ({ onDataLoad }) => {
 
   return (
     <>
-      <div>
-        <input type="file" accept=".csv" onChange={handleFileChange} />
+      <div className="flex items-center">
+        <label className="cursor-pointer text-blue-500 border border-blue-500 rounded-lg px-4 py-2 hover:bg-blue-100">
+          ファイルを選択
+          <input
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </label>
       </div>
     </>
   );
