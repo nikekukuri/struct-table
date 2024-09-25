@@ -257,8 +257,6 @@ const makeRelationByTable = ({ parentCols, childCols, data }: RelationTableProps
     throw new Error("childCols.length !== data[0].length");
   }
 
-  const regex = /(\d+)-(\d+)/;
-
   for (let i = 0; i < parentCols.length; i++) {
     for (let j = 0; j < childCols.length; j++) {
       if (data[i][j] === "○" || data[i][j] === "◎") {
