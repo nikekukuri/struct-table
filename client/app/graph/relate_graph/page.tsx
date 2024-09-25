@@ -7,12 +7,12 @@ import { FormGroup } from "@blueprintjs/core";
 import { CsvReader } from "../../components/ImportCsv";
 import { TableView, RelationTableProps } from "../../components/table";
 
-interface List {
-  elements: Record[] | Relation[];
-  type: "record" | "relation";
-  layer: number;
-  source?: string;
-  target?: string;
+interface RecordList {
+  elements: Record[];
+}
+
+interface RelationList {
+  elements: Relation[];
 }
 
 export interface Node {
@@ -68,7 +68,7 @@ interface Relation {
 
 const EX_PARENT_TABLE: Record[] = [
   {
-    id: "p0",
+    id: "rl1-1",
     label: "foo",
     layer: 1,
     criteria: {
@@ -81,7 +81,7 @@ const EX_PARENT_TABLE: Record[] = [
     },
   },
   {
-    id: "p1",
+    id: "rl1-2",
     label: "bar",
     layer: 1,
     criteria: {
@@ -94,7 +94,7 @@ const EX_PARENT_TABLE: Record[] = [
     },
   },
   {
-    id: "p2",
+    id: "rl1-3",
     label: "baz",
     layer: 1,
     criteria: {
@@ -107,7 +107,7 @@ const EX_PARENT_TABLE: Record[] = [
     },
   },
   {
-    id: "p3",
+    id: "rl1-4",
     label: "hoge",
     layer: 1,
     criteria: {
@@ -123,7 +123,7 @@ const EX_PARENT_TABLE: Record[] = [
 
 const EX_CHILD_TABLE: Record[] = [
   {
-    id: "c0",
+    id: "rl2-1",
     label: "child foo",
     layer: 2,
     criteria: {
@@ -136,7 +136,7 @@ const EX_CHILD_TABLE: Record[] = [
     },
   },
   {
-    id: "c1",
+    id: "rl2-2",
     label: "child bar",
     layer: 2,
     criteria: {
@@ -149,7 +149,7 @@ const EX_CHILD_TABLE: Record[] = [
     },
   },
   {
-    id: "c2",
+    id: "rl2-3",
     label: "child baz",
     layer: 2,
     criteria: {
@@ -162,7 +162,7 @@ const EX_CHILD_TABLE: Record[] = [
     },
   },
   {
-    id: "c3",
+    id: "rl2-4",
     label: "child hoge",
     layer: 2,
     criteria: {
@@ -177,25 +177,10 @@ const EX_CHILD_TABLE: Record[] = [
 ];
 
 const EX_RELATION: Relation[] = [
-  {
-    id: "e0",
-    label: "foo -> foo",
-    source: "p0",
-    target: "c0",
-  },
-  {
-    id: "e1",
-    label: "foo -> bar",
-    source: "p0",
-    target: "c1",
-  },
-  { id: "e2", label: "foo -> baz", source: "p0", target: "c2", },
-  {
-    id: "e3",
-    label: "foo -> hoge",
-    source: "p0",
-    target: "c3",
-  },
+  { id: "el1-1", label: "foo -> child foo", source: "rl1-1", target: "rl2-1", },
+  { id: "el1-2", label: "foo -> child bar", source: "rl1-1", target: "rl2-2", },
+  { id: "el1-3", label: "foo -> child baz", source: "rl1-1", target: "rl2-3", },
+  { id: "el1-4", label: "foo -> child hoge", source: "rl1-1", target: "rl2-4", },
 ]
 
 const ELEMENT_STYLE = [
@@ -238,20 +223,6 @@ const ELEMENT_STYLE = [
   },
 ];
 
-const createElementsByRecord = (records: Record[]) => {
-  const elements = [];
-  for (const t of records) {
-    const node: Node = {
-      group: "nodes",
-      data: t,
-      position: setPosition(t.id, t.layer),
-    };
-    elements.push(node);
-  }
-
-  return elements;
-}
-
 const OFFSET_X = 300;
 const OFFSET_Y = 150;
 const setPosition = (id: string, layer: number) => {
@@ -262,19 +233,6 @@ const setPosition = (id: string, layer: number) => {
 
 const extractNumbers = (input: string): number => {
   return parseInt(input.replace(/\D/g, ''));
-}
-
-const createElementsByRelation = (relations: Relation[]) => {
-  const elements = [];
-  for (const r of relations) {
-    const edge: Edge = {
-      group: "edges",
-      data: r,
-    };
-    elements.push(edge);
-  }
-
-  return elements;
 }
 
 const TABLE_DATA: RelationTableProps = {
@@ -299,14 +257,18 @@ const makeRelationByTable = ({ parentCols, childCols, data }: RelationTableProps
     throw new Error("childCols.length !== data[0].length");
   }
 
+  const regex = /(\d+)-(\d+)/;
+
   for (let i = 0; i < parentCols.length; i++) {
     for (let j = 0; j < childCols.length; j++) {
-      const relation: Relation = {
-        id: `${parentCols[i]}-${childCols[j]}`,
-        source: `p${i}`,
-        target: `c${j}`,
-      };
-      newRelations.push(relation);
+      if (data[i][j] === "○" || data[i][j] === "◎") {
+        const relation: Relation = {
+          id: `${parentCols[i]}-${childCols[j]}`,
+          source: parentCols[i],
+          target: childCols[j],
+        };
+        newRelations.push(relation);
+      }
     }
   }
 
@@ -326,58 +288,94 @@ const csvToRelationTable = (csv: string): RelationTableProps => {
   };
 };
 
+const removeNumStr = (str: string): string => {
+  return str.replace(/[0-9]/g, '');
+};
+
+// format id: "rl1-1": layer 1, inner id 1,  "rl2-3": layer 2, inner id 3
+// rl = Record Layer
+const ReArrangeId = (elements: Record[]): Record[] => {
+  const newRecords: Record[] = []
+  const prefix: string = "rl"; 
+  elements.forEach((e, i) => {
+    const id = i + 1;
+    newRecords.push({
+      ...e,
+      id: prefix + e.layer.toString() + "-" + id.toString(),
+    });
+  });
+
+  return newRecords;
+};
+
 const TableRelation: React.FC = () => {
+  // Input form
   const [label, setLabel] = useState<string>("");
   const [layer, setLayer] = useState<number | undefined>();
   const [criteria, setCriteria] = useState<Criteria | undefined>();
   const [description, setDescription] = useState<string>("");
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
-
-  const [selectedElement, setSelectedElement] = useState<Node | Edge | null>(null);
-
-  const [records, setRecord] = useState<Record[]>([]);
-  const [relations, setRelation] = useState<Relation[]>([]);
-
   const [source, setSource] = useState<string>("");
   const [target, setTarget] = useState<string>("");
 
-  const [lists, setLists] = useState<List[]>([]);
+  // for Graph View
+  const [selectedElement, setSelectedElement] = useState<Node | Edge | null>(null);
+  const [records, setRecord] = useState<Record[]>([...EX_PARENT_TABLE, ...EX_CHILD_TABLE]);
+  const [relations, setRelation] = useState<Relation[]>(EX_RELATION);
 
-  elements.push(...createElementsByRecord(EX_PARENT_TABLE));
-  elements.push(...createElementsByRecord(EX_CHILD_TABLE));
-  elements.push(...createElementsByRelation(EX_RELATION));
+  const initRecordLists: RecordList[] = [{elements: EX_PARENT_TABLE}, {elements: EX_CHILD_TABLE}];
+  const [recordLists, setRecordLists] = useState<RecordList[]>(initRecordLists);
+  const initRelationLists: RelationList[] = [{elements: EX_RELATION}];
+  const [relationLists, setRelationLists] = useState<RelationList[]>(initRelationLists);
 
-  lists.push({
-    elements: EX_PARENT_TABLE,
-    type: "record",
-    layer: 1,
-  })
+  const createElementsByRecord = (rec: Record[]) => {
+    const elements = [];
+    //const newRec: Record[] = ReArrangeId([...records, ...rec]);
+    const newRec: Record[] = [...records, ...rec];
+    for (const d of newRec) {
+      const node: Node = {
+        group: "nodes",
+        data: d,
+        position: setPosition(d.id, d.layer),
+      };
+      elements.push(node);
+    }
 
-  lists.push({
-    elements: EX_CHILD_TABLE,
-    type: "record",
-    layer: 2,
-  })
+    return elements;
+  };
 
-  lists.push({
-    elements: EX_RELATION,
-    type: "relation",
-    layer: 1,
-  })
+  const createElementsByRelation = (relations: Relation[]) => {
+    const elements = [...relations];
+    for (const r of relations) {
+      const edge: Edge = {
+        group: "edges",
+        data: r,
+      };
+      elements.push(edge);
+    }
 
-  const createElements = () => {
+    return elements;
+  }
+
+  // In first render, create elements by example data
+  useEffect(() => {
     const elements = [];
     elements.push(...createElementsByRecord(records));
     elements.push(...createElementsByRelation(relations));
-    console.log('lists');
-    console.log(lists);
+    setElements(elements);
+  }, []);
+
+  // Recreate elements by lists
+  useEffect(() => {
+    const elements = [];
+    elements.push(...createElementsByRecord(records));
+    elements.push(...createElementsByRelation(relations));
     console.log('elements');
     console.log(elements);
     setElements(elements);
-  };
+  }, [records, relations]);
 
-  useEffect(createElements, [records, relations]);
-
+  // Selected node handler
   const handleNodeSelection = (e: any) => {
     const selectedNode = e.target._private.data;
     console.log("---selectedNode---");
@@ -385,6 +383,7 @@ const TableRelation: React.FC = () => {
     setSelectedElement(selectedNode);
   };
 
+  // Selected edge handler
   const handleEdgeSelection = (e: any) => {
     const selectedEdge = e.target._private.data;
     console.log("---selectedEdge---");
@@ -392,9 +391,12 @@ const TableRelation: React.FC = () => {
     setSelectedElement(selectedEdge);
   };
 
-  const handleRecordsCsvData = (records: RecordsCsv[]) => {
-    const newRecords: Record[] = [];
-    for (const r of records) {
+  // Read records csv data
+  const handleRecordsCsvData = (rcsv: RecordsCsv[]) => {
+    console.log('records in handler');
+    console.log(records);
+    const newRecords: Record[] = [...records];
+    for (const r of rcsv) {
       const newRecord: Record = {
         id: r.id.toString(),
         label: r.label,
