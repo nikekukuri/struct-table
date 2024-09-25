@@ -427,6 +427,16 @@ const TableRelation: React.FC = () => {
     }
   };
 
+  const handleRelationTableChange = (data: string[][]) => {
+    const relationData: RelationTableProps = {
+      parentCols: ["rl1-1", "rl1-2", "rl1-3", "rl1-4"],
+      childCols: ["rl2-1", "rl2-2", "rl2-3", "rl2-4"],
+      data: data,
+    }
+    const newRelations: Relation[] = makeRelationByTable(relationData);
+    setRelation(newRelations);
+  }
+
   const deleteElement = () => {
     if (!selectedElement) {
       return;
@@ -544,6 +554,9 @@ const TableRelation: React.FC = () => {
           }}
           stylesheet={ELEMENT_STYLE}
         />
+        <div>
+          <TableView parentCols={TABLE_DATA.parentCols} childCols={TABLE_DATA.childCols} data={TABLE_DATA.data} handleRelationTableChange={handleRelationTableChange}/>
+        </div>
         <div className="items-center justify-center min-h-screen">
           <FormGroup className="p-8 by-gray-100 rounded-md">
             <div className="mb-4">
@@ -557,7 +570,7 @@ const TableRelation: React.FC = () => {
               <label>layer</label>
               <InputGroup
                 value={layer ? layer.toString() : ""}
-                onChange={(e) => setLayer(e.target.value)}
+                onChange={(e) => setLayer(parseInt(e.target.value))}
               ></InputGroup>
             </div>
             <div className="mb-4">
@@ -584,9 +597,6 @@ const TableRelation: React.FC = () => {
               </Button>
             </div> */}
           </FormGroup>
-        </div>
-        <div>
-          <TableView parentCols={TABLE_DATA.parentCols} childCols={TABLE_DATA.childCols} data={TABLE_DATA.data} />
         </div>
         <div>
           <h1>Debugging JSON Data</h1>

@@ -4,24 +4,22 @@ export interface RelationTableProps {
   parentCols: string[];
   childCols: string[];
   data: string[][];
+  handleRelationTableChange?: (data: string[][]) => void;
 }
 
-export const TableView: React.FC<RelationTableProps> = ({
-  parentCols,
-  childCols,
-  data,
-}) => {
+export const TableView: React.FC<RelationTableProps> = ({ parentCols, childCols, data, handleRelationTableChange }) => {
   const [tableData, setTableData] = useState<string[][]>(data);
 
-  const options = ["◎", "-", "○"];
+  const options = ['◎', '-', '○'];
 
   const handleChange = (rowIndex: number, colIndex: number, value: string) => {
     const updatedData = tableData.map((row, index) =>
       index === rowIndex
         ? row.map((cell, i) => (i === colIndex ? value : cell)) // 特定のセルの値を更新
-        : row,
+        : row
     );
     setTableData(updatedData);
+    handleRelationTableChange(updatedData);
   };
 
   return (
@@ -73,7 +71,7 @@ export const TableView: React.FC<RelationTableProps> = ({
         </tbody>
       </table>
     </div>
-  );
-};
+  );};
+
 
 export default TableView;
