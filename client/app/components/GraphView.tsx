@@ -284,7 +284,7 @@ const createElements = (nodes: Node[]) => {
   }
 
   const addedDependenciesNodes: Node[] = addDependencies(
-    addedDependencyNamesNodes,
+    addedDependencyNamesNodes
   );
 
   // TODO: targetNode should be selected by user.
@@ -365,7 +365,7 @@ export const Graph: React.FC = () => {
   const handleEditNodeButtonClick = () => {
     const targetName = name;
     const targetNodeIdx = nodesData.findIndex(
-      (data) => data.info.name === targetName,
+      (data) => data.info.name === targetName
     );
 
     if (targetNodeIdx !== -1) {
@@ -457,6 +457,7 @@ export const Graph: React.FC = () => {
               <InputGroup
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                className="border-2 border-gray-300 rounded"
               ></InputGroup>
             </div>
             <div className="mb-4">
@@ -464,6 +465,7 @@ export const Graph: React.FC = () => {
               <InputGroup
                 value={viewName}
                 onChange={(e) => setViewName(e.target.value)}
+                className="border-2 border-gray-300 rounded"
               ></InputGroup>
             </div>
             <div className="mb-4">
@@ -471,6 +473,7 @@ export const Graph: React.FC = () => {
               <InputGroup
                 value={initValue}
                 onChange={(e) => setInitValue(e.target.value)}
+                className="border-2 border-gray-300 rounded"
               ></InputGroup>
             </div>
             <div className="mb-4">
@@ -478,6 +481,7 @@ export const Graph: React.FC = () => {
               <InputGroup
                 value={expression}
                 onChange={(e) => setExpression(e.target.value)}
+                className="border-2 border-gray-300 rounded"
               ></InputGroup>
             </div>{" "}
             <div className="mb-4">
@@ -485,6 +489,7 @@ export const Graph: React.FC = () => {
               <InputGroup
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
+                className="border-2 border-gray-300 rounded"
               ></InputGroup>
             </div>
             <div className="mb-4">
@@ -492,6 +497,7 @@ export const Graph: React.FC = () => {
               <InputGroup
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
+                className="border-2 border-gray-300 rounded"
               ></InputGroup>
             </div>
             <div className="flex space-x-4">
