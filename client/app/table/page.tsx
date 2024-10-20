@@ -34,7 +34,7 @@ const TableView: React.FC<TableViewProps> = ({ tableName }) => {
 
         const jsonCol = await resCol.json();
         setCols(
-          jsonCol.data.getTableColumns.map((str: string) => _.camelCase(str)),
+          jsonCol.data.getTableColumns.map((str: string) => _.camelCase(str))
         );
         console.log(jsonCol.data.getTableColumns);
 
