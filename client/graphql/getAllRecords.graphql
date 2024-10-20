@@ -1,8 +1,0 @@
-query {
-  getAllRecords(id: 0) {
-    col1
-    col2
-    col3
-    col4
-  }
-}
