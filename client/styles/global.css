@@ -1,0 +1,13 @@
+div {
+  background-image: none;
+  background-color: white;
+  background: none;
+  box-shadow: none;
+  outline: none;
+}
+
+html,
+body {
+  background-image: none;
+  background-color: white;
+}
