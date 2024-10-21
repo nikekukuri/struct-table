@@ -9,6 +9,7 @@ export const AppNavBar = () => {
           <Link href="/">Home</Link>
           <Link href="/table">Table</Link>
           <Link href="/graph">Graph</Link>
+          <Link href="/generate">Generate</Link>
         </Navbar.Heading>
       </Navbar.Group>
     </Navbar>
