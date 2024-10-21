@@ -1,26 +1,20 @@
 import React, { useState, useEffect } from "react";
+import { childData } from "../generate/page";
 
-export interface RelationTableProps {
-  rowHeader: string[];
+export interface GenerateTableProps {
+  rowData: childData[];
   colHeader: string[];
-  selectedColHeader: string[];
   data: { row: string[]; color: string }[];
-  sendSelectedColHeader: (colHeader: string[]) => void;
 }
 
-export const TableView: React.FC<RelationTableProps> = ({
-  rowHeader,
+export const GenerateTableView: React.FC<GenerateTableProps> = ({
+  rowData,
   colHeader,
-  selectedColHeader,
   data,
-  sendSelectedColHeader,
 }) => {
-  const handleColHeaderChange = (index: number, value: string) => {
-    const newColHeader = [...selectedColHeader];
-    newColHeader[index] = value;
-    sendSelectedColHeader(newColHeader);
-  };
-
+  const rowHeader = rowData.map((row) => {
+    return row.header;
+  });
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse table-auto border border-gray-300">
@@ -29,22 +23,12 @@ export const TableView: React.FC<RelationTableProps> = ({
             <th className="border border-gray-300 bg-blue-500 px-4 py-2 text-left text-sm font-medium text-white">
               Items
             </th>
-            {selectedColHeader.map((col, index) => (
+            {colHeader.map((col, index) => (
               <th
                 key={index}
                 className="border border-gray-300 bg-blue-500 px-4 py-2 text-left text-sm font-medium text-white"
               >
-                <select
-                  value={col}
-                  onChange={(e) => handleColHeaderChange(index, e.target.value)}
-                  className="bg-blue-500 text-white text-sm"
-                >
-                  {colHeader.map((option, i) => (
-                    <option key={i} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
+                {col}
               </th>
             ))}
           </tr>
@@ -74,4 +58,4 @@ export const TableView: React.FC<RelationTableProps> = ({
   );
 };
 
-export default TableView;
+export default GenerateTableView;

@@ -1,3 +1,5 @@
+import { rowData } from "./diff";
+
 const EXAMPLE_RELATION = [
   ["○", "-", "-", "-", "-"],
   ["-", "-", "-", "-", "-"],
@@ -7,30 +9,34 @@ const EXAMPLE_RELATION = [
 ];
 
 interface childData {
-  header: string[];
-  flag: boolean[];
+  headers: string[];
+  flags: boolean[];
 }
 
 // TODO: return match number of columns
 export const extractTargetChildByRelation = (
-  parentHeader: string[],
-  childHeader: string[],
+  parentDiff: rowData[],
+  childHeaders: string[],
   relationData: string[][]
 ) => {
-  if (!validateRelationData(parentHeader, childHeader, relationData)) {
+  const parentHeaders: string[] = parentDiff.map((row) => {
+    return row.parent;
+  });
+
+  if (!validateRelationData(parentHeaders, childHeaders, relationData)) {
     return [];
   }
 
-  const flags = new Array(childHeader.length).fill(false);
-  relationData.map((row) => {
-    row.map((value, i) => {
-      if (value === "○") {
-        flags[i] = true;
+  const flags = new Array(childHeaders.length).fill(false);
+  relationData.map((row, i) => {
+    row.map((value, j) => {
+      if (parentDiff[i].hasDiff === true && value === "○") {
+        flags[j] = true;
       }
     });
   });
 
-  return { header: childHeader, flag: flags };
+  return { headers: childHeaders, flags: flags };
 };
 
 const validateRelationData = (

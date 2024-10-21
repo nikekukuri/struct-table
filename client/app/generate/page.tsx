@@ -8,17 +8,18 @@ import { CsvReader } from "../components/ImportCsv";
 
 import { diffList, rowData } from "./diff";
 import { extractTargetChildByRelation } from "./relation";
-import { Button } from "@blueprintjs/core";
+import { Button, Icon } from "@blueprintjs/core";
 import { IconNames } from "@blueprintjs/icons";
-import { all } from "mathjs";
-
-// TODOs
-// 1. csvファイルから項目をリード
-// 2. 差分を取得するデータを選択
+import GenerateTableView from "../components/GenerateTable";
 
 interface columnData {
   header: string;
   data: string[];
+}
+
+export interface childData {
+  header: string;
+  isCheck: boolean;
 }
 
 const LIST_A: columnData = {
@@ -46,7 +47,8 @@ const EXAMPLE_TABLE_DATA = {
   ],
 };
 
-const EXAMPLE_ROW_HEADER = ["A-1", "A-2", "A-3", "A-4", "A-5"];
+const EXAMPLE_PARENT_ROW_HEADER = ["A-1", "A-2", "A-3", "A-4", "A-5"];
+const EXAMPLE_CHILD_ROW_HEADER = ["C-1", "C-2", "C-3", "C-4", "C-5"];
 
 const EXAMPLE_RELATION = [
   ["○", "-", "-", "-", "-"],
@@ -56,17 +58,11 @@ const EXAMPLE_RELATION = [
   ["-", "-", "-", "○", "-"],
 ];
 
-const getColNumber = (allColHeader: string[], targetCols: string[]) => {
-  const colNumbers: number[] = [];
-  targetCols.map((col) => {
-    colNumbers.push(allColHeader.indexOf(col));
-  });
-};
-
 const generateTable = () => {
   const [contentTable, setContentTable] = useState<string[][]>([]);
   const handleContentsCsvData = (data: string[][]) => {
     setContentTable(data);
+    // 読み込みデータから親項目parentListを取得して更新
     console.log(data);
   };
 
@@ -95,13 +91,16 @@ const generateTable = () => {
     setSelectedColHeader(headers);
   };
 
+  const [parentList, setParentList] = useState<string[]>(
+    EXAMPLE_PARENT_ROW_HEADER
+  );
   const [diffData, setDiffData] = useState<rowData[]>(
-    diffList(LIST_A.data, LIST_B.data)
+    diffList(LIST_A.data, LIST_B.data, parentList)
   );
 
   const allColumns = [LIST_A, LIST_B, LIST_C];
   const [tableData, setTableData] = useState({
-    rowHeader: EXAMPLE_ROW_HEADER,
+    rowHeader: EXAMPLE_PARENT_ROW_HEADER,
     colHeader: allColumns.map((col) => col.header),
     data: diffData,
   });
@@ -118,29 +117,46 @@ const generateTable = () => {
 
     const newDiffData = diffList(
       allColumns[colNumbers[0]].data,
-      allColumns[colNumbers[1]].data
+      allColumns[colNumbers[1]].data,
+      EXAMPLE_PARENT_ROW_HEADER
     );
 
     setDiffData(newDiffData);
     setTableData({
-      rowHeader: EXAMPLE_ROW_HEADER,
+      rowHeader: EXAMPLE_PARENT_ROW_HEADER,
       colHeader: allColumns.map((col) => col.header),
       data: newDiffData,
     });
   }, [selectedColHeader]);
 
-  const childList = extractTargetChildByRelation(
-    EXAMPLE_TABLE_DATA.rowHeader,
-    EXAMPLE_TABLE_DATA.colHeader,
-    EXAMPLE_RELATION
+  const [childList, setChildList] = useState(
+    extractTargetChildByRelation(
+      diffData,
+      EXAMPLE_CHILD_ROW_HEADER, // ファイルから取得する
+      EXAMPLE_RELATION // ファイルから取得する
+    )
   );
 
-  const generatedChildData: string[] = [];
-  childList.header.map((h: string, i: number) => {
-    if (childList.flag[i]) {
-      generatedChildData.push(h);
-    }
-  });
+  const [childData, setChildData] = useState<childData[]>([]);
+  useEffect(() => {
+    const newChildData: childData[] = [];
+    childList.flags.map((flag: boolean, i: number) => {
+      newChildData.push({ header: childList.headers[i], isCheck: flag });
+    });
+    setChildData(newChildData);
+    console.log(newChildData);
+  }, [childList]);
+
+  // ここでchildListを更新して上のuseEffectでchildDataを更新する（かなり微妙なので直したい）
+  const handleGenerateButtonClicked = () => {
+    // selectedHeaderの差分からextractTargetChildByRelation()を実行
+    const newChildList = extractTargetChildByRelation(
+      diffData,
+      EXAMPLE_CHILD_ROW_HEADER, // TODO: ファイルから取得する
+      EXAMPLE_RELATION // TODO: ファイルから取得する
+    );
+    setChildList(newChildList);
+  };
 
   return (
     <>
@@ -158,19 +174,20 @@ const generateTable = () => {
         data={tableData.data}
         sendSelectedColHeader={handleSetColHeader}
       />
-      <Button
-        minimal
-        className="cursor-pointer bg-blue-500 hover:bg-blue-700 rounded-lg py-4 text-white"
-        icon={IconNames.GENERATE}
-      >
-        Generate
-      </Button>
-      <TableView
-        rowHeader={generatedChildData}
+      <div className="py-2">
+        <Button
+          minimal
+          className="cursor-pointer bg-green-500 hover:bg-green-700 rounded-lg py-2 px-4 text-white inline-flex items-center"
+          onClick={handleGenerateButtonClicked}
+          icon={IconNames.GENERATE}
+        >
+          <span className="ml-2">Generate</span>
+        </Button>
+      </div>
+      <GenerateTableView
+        rowData={childData}
         colHeader={tableData.colHeader}
-        selectedColHeader={selectedColHeader}
         data={tableData.data}
-        sendSelectedColHeader={handleSetColHeader}
       />
     </>
   );
