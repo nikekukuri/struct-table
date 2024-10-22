@@ -167,6 +167,7 @@ const generateTable = () => {
   return (
     <>
       <AppNavBar />
+      <div className="px-4">
       <div className="py-2">
         <p>Parent data CSV</p>
         <CsvReader onDataLoad={handleContentsCsvData} />
@@ -195,6 +196,7 @@ const generateTable = () => {
         colHeader={tableData.colHeader}
         data={tableData.data}
       />
+      </div>
     </>
   );
 };
