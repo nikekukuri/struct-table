@@ -50,6 +50,14 @@ const generateTable = () => {
   const handleContentsCsvData = (data: string[][]) => {
     console.log("Read csv data", data);
 
+    // Get parent header
+    const newParentHeader: string[] = [];
+    data.map((row) => {
+      newParentHeader.push(row.content); // TODO: temporary "content" key
+    });
+    console.log("parent header", newParentHeader);
+    setParentHeaders(newParentHeader);
+
     const newColData: columnData[] = [];
 
     const newAllColHeader: string[] = [];
@@ -84,13 +92,6 @@ const generateTable = () => {
   const handleRelationCsvData = (data: string[][]) => {
     console.log("Read csv data", data);
 
-    // Get parent header
-    const newParentHeader: string[] = [];
-    data.map((row) => {
-      newParentHeader.push(row.content); // TODO: temporary "content" key
-    });
-    console.log("parent header", newParentHeader);
-    setParentHeaders(newParentHeader);
 
     // Get child header
     const newChildHeader: string[] = [];
