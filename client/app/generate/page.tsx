@@ -35,18 +35,6 @@ const LIST_C: columnData = {
   data: ["C-1", "fuga", "C-3", "", "baz"],
 };
 
-const EXAMPLE_TABLE_DATA = {
-  rowHeader: ["A-1", "A-2", "A-3", "A-4", "A-5"],
-  colHeader: ["B-1", "B-2", "B-3", "B-4", "B-5"],
-  data: [
-    { row: ["○", "-", "○", "○", "○"], color: "yellow" },
-    { row: ["○", "-", "○", "○", "○"], color: "" },
-    { row: ["-", "○", "◎", "○", "○"], color: "yellow" },
-    { row: ["○", "○", "○", "-", "○"], color: "" },
-    { row: ["○", "◎", "○", "○", "○"], color: "" },
-  ],
-};
-
 const EXAMPLE_PARENT_ROW_HEADER = ["A-1", "A-2", "A-3", "A-4", "A-5"];
 const EXAMPLE_CHILD_ROW_HEADER = ["C-1", "C-2", "C-3", "C-4", "C-5"];
 
@@ -62,12 +50,38 @@ const generateTable = () => {
   const [contentTable, setContentTable] = useState<string[][]>([]);
   const handleContentsCsvData = (data: string[][]) => {
     setContentTable(data);
-    // 読み込みデータから親項目parentListを取得して更新
     console.log(data);
   };
 
   const [relationTable, setRelationTable] = useState<string[][]>([]);
+  const [parentHeaders, setParentHeaders] = useState<string[]>(
+    EXAMPLE_PARENT_ROW_HEADER
+  );
+  const [childHeaders, setChildHeaders] = useState<string[]>(
+    EXAMPLE_CHILD_ROW_HEADER
+  );
   const handleRelationCsvData = (data: string[][]) => {
+    console.log(data);
+
+    // Get parent header
+    const newParentHeader: string[] = [];
+    data.map((row) => {
+      newParentHeader.push(row.content); // TODO: temporary "content" key
+    });
+    console.log("parent header", newParentHeader);
+    setParentHeaders(newParentHeader);
+
+    // Get child header
+    const newChildHeader: string[] = [];
+    Object.keys(data[0]).map((key: string, i: number) => {
+      if (i > 0) {
+        newChildHeader.push(key);
+      }
+    });
+    console.log("child header", newChildHeader);
+    setChildHeaders(newChildHeader);
+
+    // Get relation table
     const newTable: string[][] = [];
     data.map((row, i) => {
       const newRow: string[] = [];
@@ -78,9 +92,8 @@ const generateTable = () => {
       });
       newTable.push(newRow);
     });
-
-    setRelationTable(newTable);
     console.log(newTable);
+    setRelationTable(newTable);
   };
 
   const [selectedColHeader, setSelectedColHeader] = useState<string[]>([
@@ -91,16 +104,13 @@ const generateTable = () => {
     setSelectedColHeader(headers);
   };
 
-  const [parentList, setParentList] = useState<string[]>(
-    EXAMPLE_PARENT_ROW_HEADER
-  );
   const [diffData, setDiffData] = useState<rowData[]>(
-    diffList(LIST_A.data, LIST_B.data, parentList)
+    diffList(LIST_A.data, LIST_B.data, parentHeaders)
   );
 
   const allColumns = [LIST_A, LIST_B, LIST_C];
   const [tableData, setTableData] = useState({
-    rowHeader: EXAMPLE_PARENT_ROW_HEADER,
+    rowHeader: parentHeaders,
     colHeader: allColumns.map((col) => col.header),
     data: diffData,
   });
@@ -118,23 +128,19 @@ const generateTable = () => {
     const newDiffData = diffList(
       allColumns[colNumbers[0]].data,
       allColumns[colNumbers[1]].data,
-      EXAMPLE_PARENT_ROW_HEADER
+      parentHeaders
     );
 
     setDiffData(newDiffData);
     setTableData({
-      rowHeader: EXAMPLE_PARENT_ROW_HEADER,
+      rowHeader: parentHeaders,
       colHeader: allColumns.map((col) => col.header),
       data: newDiffData,
     });
   }, [selectedColHeader]);
 
   const [childList, setChildList] = useState(
-    extractTargetChildByRelation(
-      diffData,
-      EXAMPLE_CHILD_ROW_HEADER, // ファイルから取得する
-      EXAMPLE_RELATION // ファイルから取得する
-    )
+    extractTargetChildByRelation(diffData, childHeaders, EXAMPLE_RELATION)
   );
 
   const [childData, setChildData] = useState<childData[]>([]);
@@ -152,8 +158,8 @@ const generateTable = () => {
     // selectedHeaderの差分からextractTargetChildByRelation()を実行
     const newChildList = extractTargetChildByRelation(
       diffData,
-      EXAMPLE_CHILD_ROW_HEADER, // TODO: ファイルから取得する
-      EXAMPLE_RELATION // TODO: ファイルから取得する
+      childHeaders,
+      relationTable
     );
     setChildList(newChildList);
   };

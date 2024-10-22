@@ -37,7 +37,9 @@ export const GenerateTableView: React.FC<GenerateTableProps> = ({
           {data.map((dataRow, rowIndex) => (
             <tr
               key={rowIndex}
-              className={`${dataRow.color ? "bg-yellow-200" : "bg-gray-100"}`}
+              className={`${
+                rowData[rowIndex] ? "bg-yellow-200" : "bg-gray-100"
+              }`}
             >
               <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
                 {rowHeader[rowIndex]}
