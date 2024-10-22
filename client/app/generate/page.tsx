@@ -8,7 +8,7 @@ import { CsvReader } from "../components/ImportCsv";
 
 import { diffList, rowData } from "./diff";
 import { extractTargetChildByRelation } from "./relation";
-import { Button, Icon } from "@blueprintjs/core";
+import { Button } from "@blueprintjs/core";
 import { IconNames } from "@blueprintjs/icons";
 import GenerateTableView from "../components/GenerateTable";
 
@@ -47,10 +47,31 @@ const EXAMPLE_RELATION = [
 ];
 
 const generateTable = () => {
-  const [contentTable, setContentTable] = useState<string[][]>([]);
   const handleContentsCsvData = (data: string[][]) => {
-    setContentTable(data);
-    console.log(data);
+    console.log("Read csv data", data);
+
+    const newColData: columnData[] = [];
+
+    const newAllColHeader: string[] = [];
+    Object.keys(data[0]).map((key, i) => {
+      if (i > 0) {
+        newAllColHeader.push(key);
+      }
+    });
+    console.log("All column headers", newAllColHeader);
+
+    newAllColHeader.map((header: string) => {
+      const tdata: string[] = [];
+      data.map((row) => {
+        tdata.push(row[header]);
+      });
+      newColData.push({
+        header: header,
+        data: tdata,
+      })
+    });
+    setAllColumns(newColData);
+    console.log("newAllColData", newColData);
   };
 
   const [relationTable, setRelationTable] = useState<string[][]>([]);
@@ -61,7 +82,7 @@ const generateTable = () => {
     EXAMPLE_CHILD_ROW_HEADER
   );
   const handleRelationCsvData = (data: string[][]) => {
-    console.log(data);
+    console.log("Read csv data", data);
 
     // Get parent header
     const newParentHeader: string[] = [];
@@ -108,8 +129,8 @@ const generateTable = () => {
     diffList(LIST_A.data, LIST_B.data, parentHeaders)
   );
 
-  const allColumns = [LIST_A, LIST_B, LIST_C];
-  const [tableData, setTableData] = useState({
+  const [allColumns, setAllColumns] = useState([LIST_A, LIST_B, LIST_C]);
+  const [viewTableData, setViewTableData] = useState({
     rowHeader: parentHeaders,
     colHeader: allColumns.map((col) => col.header),
     data: diffData,
@@ -132,12 +153,12 @@ const generateTable = () => {
     );
 
     setDiffData(newDiffData);
-    setTableData({
+    setViewTableData({
       rowHeader: parentHeaders,
       colHeader: allColumns.map((col) => col.header),
       data: newDiffData,
     });
-  }, [selectedColHeader]);
+  }, [selectedColHeader, allColumns]);
 
   const [childList, setChildList] = useState(
     extractTargetChildByRelation(diffData, childHeaders, EXAMPLE_RELATION)
@@ -175,10 +196,10 @@ const generateTable = () => {
         <CsvReader onDataLoad={handleRelationCsvData} />
       </div>
       <TableView
-        rowHeader={tableData.rowHeader}
-        colHeader={tableData.colHeader}
+        rowHeader={viewTableData.rowHeader}
+        colHeader={viewTableData.colHeader}
         selectedColHeader={selectedColHeader}
-        data={tableData.data}
+        data={viewTableData.data}
         sendSelectedColHeader={handleSetColHeader}
       />
       <div className="py-2">
@@ -193,8 +214,8 @@ const generateTable = () => {
       </div>
       <GenerateTableView
         rowData={childData}
-        colHeader={tableData.colHeader}
-        data={tableData.data}
+        colHeader={viewTableData.colHeader}
+        data={viewTableData.data}
       />
       </div>
     </>
