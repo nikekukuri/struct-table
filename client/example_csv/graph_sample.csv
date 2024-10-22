@@ -1,0 +1,6 @@
+id,name,viewName,expression,unit,status,initValue,expected,depth,dependencies,description
+0,a,a,b + c,V,calc,,24,0,,
+1,b,b,d * e,V,calc,,15,0,,
+2,c,c,,V,calc,9,9,0,,
+3,d,d,,V,calc,3,3,0,,
+4,e,e,,V,calc,5,5,0,,
