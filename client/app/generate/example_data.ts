@@ -24,7 +24,15 @@ export const EXAMPLE_RELATION = [
   ["-", "-", "-", "○", "-"],
 ];
 
-export const EXAMPLE_CHILD_COLUMN_HEADERS = [
+export const EXAMPLE_ROW_DATA = [
+  { header: "C-1", isCheck: true },
+  { header: "C-2", isCheck: true },
+  { header: "C-3", isCheck: false },
+  { header: "C-4", isCheck: false },
+  { header: "C-5", isCheck: false },
+];
+
+export const EXAMPLE_CHILD_COLUMN_HEADER: string[] = [
   "col-1",
   "col-2",
   "col-3",
@@ -35,10 +43,26 @@ export const EXAMPLE_CHILD_COLUMN_HEADERS = [
   "col-8",
   "col-9",
   "col-10",
-]
+];
 
-const EXAMPLE_CHILD_DATA = [];
-// EXAMPLE_CHILD_COLUMN_HEADERS.map((col) => {
-//   
-// })
+export interface Data {
+  row: string[];
+  color: string;
+}
+export interface childData {
+  header: string;
+  data: Data;
+}
 
+export const EXAMPLE_CHILD_DATA: Data[] = [];
+EXAMPLE_CHILD_ROW_HEADER.map((row) => {
+  const data: string[] = [];
+  EXAMPLE_CHILD_COLUMN_HEADER.map((col) => {
+    const item: string = `${row}-${col}`;
+    data.push(item);
+  });
+  EXAMPLE_CHILD_DATA.push({
+    row: data,
+    color: "",
+  });
+});
