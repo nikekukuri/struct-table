@@ -15,6 +15,14 @@ export const GenerateTableView: React.FC<GenerateTableProps> = ({
   const rowHeader = rowData.map((row) => {
     return row.header;
   });
+
+  const isChecks = new Array(rowData.length).fill(false);
+  rowData.map((row, i) => {
+    if (row.isCheck !== undefined) {
+      isChecks[i] = row.isCheck;
+    }
+  });
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse table-auto border border-gray-300">
@@ -38,7 +46,7 @@ export const GenerateTableView: React.FC<GenerateTableProps> = ({
             <tr
               key={rowIndex}
               className={`${
-                rowData[rowIndex].isCheck ? "bg-yellow-200" : "bg-gray-100"
+                isChecks[rowIndex] ? "bg-yellow-200" : "bg-gray-100"
               }`}
             >
               <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">

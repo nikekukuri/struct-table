@@ -157,6 +157,7 @@ const generateTable = () => {
     data: diffData,
   });
 
+  // When selectedColHeader updated.
   useEffect(() => {
     const colNumbers: number[] = [];
     selectedColHeader.map((selCol) => {
@@ -166,6 +167,16 @@ const generateTable = () => {
         }
       });
     });
+
+    // Check selectedColHeader length
+    if (colNumbers.length < 2) {
+      if (colNumbers.length === 1) {
+        colNumbers.push(1);
+      } else if (colNumbers.length === 0) {
+        colNumbers.push(0);
+        colNumbers.push(1);
+      }
+    }
 
     const newDiffData = diffList(
       allColumns[colNumbers[0]].data,
@@ -179,7 +190,23 @@ const generateTable = () => {
       colHeader: allColumns.map((col) => col.header),
       data: newDiffData,
     });
-  }, [selectedColHeader, allColumns]);
+  }, [selectedColHeader]);
+
+  // When new csv data read.
+  useEffect(() => {
+    const newDiffData = diffList(
+      allColumns[0].data,
+      allColumns[1].data,
+      parentHeaders
+    );
+
+    setDiffData(newDiffData);
+    setViewTableData({
+      rowHeader: parentHeaders,
+      colHeader: allColumns.map((col) => col.header),
+      data: newDiffData,
+    });
+  }, [allColumns]);
 
   const [childList, setChildList] = useState(
     extractTargetChildByRelation(diffData, childHeaders, EXAMPLE_RELATION)
