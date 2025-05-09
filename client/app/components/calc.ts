@@ -1,74 +1,98 @@
 import { evaluate } from "mathjs";
-import { Node } from "./page";
+import { Node } from "./types";
 
-export const calculateGraph = (node: Node): Node => {
-  const filledEdgesNode: Node = fillInitialValueOnEdges(node);
-  const calculatedNode = calculateRecursive(filledEdgesNode);
-  calculatedNode.data.info.currentValue = calculateExpression(calculatedNode);
-  return calculatedNode;
+export const getNodeByName = (nodes: Node[], name: string): Node | undefined => {
+  return nodes.find((node) => node.data.name === name);
 };
 
-export const calculateRecursive = (node: Node): Node => {
-  const calculatedNode = { ...node };
-  const dependencyNodes = [];
-  for (const dependency of node.data.info.dependencies) {
-    if (!isAllDependenciesCalculated(dependency)) {
-      // Recursive process
-      console.log(`Recursive process: ${dependency.data.info.name}`);
-      const tmpNode = calculateRecursive(dependency);
-      dependencyNodes.push(tmpNode);
-    } else if (dependency.data.info.currentValue === undefined) {
-      // Calculate current value
-      dependency.data.info.currentValue = calculateExpression(dependency);
-    }
-    dependencyNodes.push(dependency);
-  }
-  calculatedNode.data.info.dependencies = dependencyNodes;
-  return calculatedNode;
+export const getNodeIdByName = (nodes: Node[], name: string): number | undefined => {
+  return nodes.findIndex((node) => node.data.name === name);
 };
 
-const isAllDependenciesCalculated = (node: Node): boolean => {
-  for (const dependency of node.data.info.dependencies) {
-    if (dependency.data.info.currentValue === undefined) {
-      return false;
-    }
-  }
-  return true;
+export const calculateGraph = (nodes: Node[], startId: string): Node[] => {
+  const terminateNodeFilledValue: Node[] = fillTerminateNodeValue(nodes);
+  const startNode = nodes.find((node) => node.data.id === startId);
+  return calcGraphScanning(terminateNodeFilledValue, startNode);
 };
 
-const isEdgeNode = (node: Node): boolean => {
-  if (node.data.info.dependencies.length === 0) {
-    return true;
-  }
-  return false;
-};
+export const calcGraphScanning = (nodes: Node[], start: Node): Node[] => {
+  let idStack: number[] = [];
+  idStack.push(nodes.findIndex((node) => node === start));
 
-const fillInitialValueOnEdges = (node: Node): Node => {
-  const newNode = { ...node };
-  const dependencyNodes = [];
-  for (const dependency of node.data.info.dependencies) {
-    if (isEdgeNode(dependency)) {
-      dependency.data.info.currentValue = dependency.data.info.initValue;
-      dependencyNodes.push(dependency);
+  while (idStack.length !== 0) {
+    // Get top of stack
+    const i = idStack[idStack.length - 1];
+    const targetNode = nodes[i];
+
+    if (isTerm(targetNode)) {
+      idStack.pop();
+    } else if (isFilledDependsOnParams(nodes, targetNode)) {
+      nodes[i].data.currentValue = calcExp(nodes, targetNode);
+      idStack.pop();
     } else {
-      // Recursive process
-      const tmpNode = fillInitialValueOnEdges(dependency);
-      dependencyNodes.push(tmpNode);
+      const dependsOnIds = getDependsOnIds(
+        nodes,
+        targetNode.data.dependsOnParams,
+      );
+      dependsOnIds.map((id) => idStack.push(id));
     }
   }
-  newNode.data.info.dependencies = dependencyNodes;
-  return newNode;
+
+  return nodes;
 };
 
-const calculateExpression = (node: Node): number => {
-  let exp = node.data.info.expression;
-  for (const dependency of node.data.info.dependencies) {
-    if (dependency.data.info.currentValue !== undefined) {
-      exp = exp.replace(
-        dependency.data.info.name,
-        dependency.data.info.currentValue.toString(),
-      );
+const getDependsOnIds = (nodes: Node[], params: string[]): number[] => {
+  return params.map((param) =>
+    nodes.findIndex((node) => node.data.name === param),
+  );
+};
+
+const isTerm = (node: Node): boolean => {
+  return node.data.dependsOnParams.length === 0;
+};
+
+// Check if the node is a terminal node.
+const isFilledDependsOnParams = (nodes: Node[], target: Node): boolean => {
+  console.log("target", target);
+  const dependsOnParams = target.data.dependsOnParams;
+  const dependsOnIds = getDependsOnIds(nodes, dependsOnParams);
+  const isFills = dependsOnIds.map(
+    (i) => nodes[i].data.currentValue !== undefined,
+  );
+  return isFills.every((flag) => flag === true);
+};
+
+// Fill the terminal node value with the initial value.
+const fillTerminateNodeValue = (nodes: Node[]): Node[] => {
+  return nodes.map((node) => {
+    if (node.data.dependsOnParams.length === 0) {
+      return updateNodeValue(node, node.data.initValue);
+    } else {
+      return node;
     }
+  });
+};
+
+// Update the node value.
+const updateNodeValue = (node: Node, value: number): Node => {
+  return {
+    ...node,
+    data: {
+      ...node.data,
+      currentValue: value,
+    },
+  };
+};
+
+// calculate the expression value.
+const calcExp = (nodes: Node[], target: Node): number => {
+  let exp = target.data.expression;
+  const dependsOnIds = getDependsOnIds(nodes, target.data.dependsOnParams);
+  for (const i of dependsOnIds) {
+    exp = exp.replace(
+      nodes[i].data.name,
+      nodes[i].data.currentValue.toString(),
+    );
   }
   return evaluate(exp);
 };

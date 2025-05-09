@@ -41,9 +41,28 @@ export const tokenize = (exp: string): Token[] => {
       continue;
     }
 
-    if (/\d/.test(char) || (char === "." && /\d/.test(exp[current + 1]))) {
+    if (
+      /\d/.test(char) ||
+      (char === "." && /\d/.test(exp[current + 1])) ||
+      (char === "e" && (exp[current + 1] === "-" || exp[current + 1] === "+"))
+    ) {
       let value = "";
-      while (/\d/.test(char) || (char === "." && /\d/.test(exp[current + 1]))) {
+      let hasExponent = false;
+      while (
+        /\d/.test(char) ||
+        (char === "." && /\d/.test(exp[current + 1])) ||
+        (char === "e" && !hasExponent)
+      ) {
+        if (char === "e") {
+          hasExponent = true;
+          value += char;
+          char = exp[++current];
+          if (char === "-" || char === "+") {
+            value += char;
+            char = exp[++current];
+          }
+          continue;
+        }
         value += char;
         char = exp[++current];
       }
@@ -56,11 +75,13 @@ export const tokenize = (exp: string): Token[] => {
 
       while (/[a-zA-Z0-9_]/.test(char)) {
         value += char;
-        +current++;
+        current++;
         if (current >= exp.length) break;
         char = exp[current];
       }
-      tokens.push({ type: TokenType.Variable, value });
+      if (!isReservedWord(value)) {
+        tokens.push({ type: TokenType.Variable, value });
+      }
       continue;
     }
 
@@ -69,4 +90,9 @@ export const tokenize = (exp: string): Token[] => {
   }
 
   return tokens;
+};
+
+const isReservedWord = (word: string): boolean => {
+  const reservedWords: string[] = ["log", "ln"];
+  return reservedWords.includes(word);
 };

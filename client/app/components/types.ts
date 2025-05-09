@@ -12,7 +12,18 @@ export interface Edge {
 export interface Data {
   id: string;
   label?: string;
-  info: Info;
+  name: string;
+  viewName: string;
+  expression: string;
+  unit: string;
+  status: string;
+  currentValue?: number;
+  initValue: number;
+  expected: number;
+  dependsOnParams: string[];
+  depth: number;
+  description: string;
+  isVisited: boolean;
 }
 
 export interface EdgeData {
@@ -23,22 +34,6 @@ export interface EdgeData {
   value?: number;
 }
 
-export interface Info {
-  name: string;
-  viewName: string;
-  expression: string;
-  unit: string;
-  status: string;
-  currentValue?: number;
-  initValue: number;
-  expected: number;
-  dependencies: Node[];
-  dependencyNames: string[];
-  depth: number;
-  description: string;
-  isVisited: boolean;
-}
-
 export interface Csv {
   id: string;
   name: string;
@@ -46,13 +41,9 @@ export interface Csv {
   expression: string;
   unit: string;
   status: string;
-  // currentValue?: number;
   initValue: number;
   expected: number;
-  dependencies: Node[];
-  dependencyNames: string[];
+  dependsOnParams: string[];
   depth: number;
   description: string;
-  // isVisited: boolean;
 }
-

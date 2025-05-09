@@ -4,29 +4,33 @@ import CytoscapeComponent from "react-cytoscapejs";
 import { useState, useEffect } from "react";
 import { Button, InputGroup } from "@blueprintjs/core";
 import { FormGroup } from "@blueprintjs/core";
-import {
-  addDependencies,
-  extractDependencyNames,
-  makeNodeGraph,
-} from "./parse";
-import { calculateGraph } from "./calc";
+import { addDependsOnParams } from "./parse";
+import { calculateGraph, getNodeByName } from "./calc";
 import { CsvReader } from "../components/ImportCsv";
 import { EXAMPLE_DATA } from "./GraphExample";
 import { ELEMENT_STYLE } from "./GraphStyle";
 import { Data, Node, Edge, Csv } from "./types";
 
-const createEdge = (node: Node): Edge[] => {
+const createEdge = (nodes: Node[]): Edge[] => {
   const edges: Edge[] = [];
-  for (const dependency of node.data.info.dependencies) {
-    const edge: Edge = {
-      group: "edges",
-      data: {
-        id: `${node.data.info.name}-${dependency.data.info.name}`,
-        source: node.data.id,
-        target: dependency.data.id,
-      },
-    };
-    edges.push(edge);
+  for (const node of nodes) {
+    const params = node.data.dependsOnParams;
+    if (params !== undefined) {
+      const tmpEdges = params.map(param => {
+        const depNode = getNodeByName(nodes, param);
+        if (depNode.data.dependsOnParams !== undefined) {
+          return {
+            group: "edges",
+            data: {
+              id: `${node.data.name}-${depNode.data.name}`,
+              source: node.data.id,
+              target: depNode.data.id,
+            },
+          };
+        }
+      })
+      tmpEdges.map(edge => edges.push(edge));
+    }
   }
   return edges;
 };
@@ -46,91 +50,62 @@ const getUniqueNodeID = (data: Data[]): string => {
   return (maxId + 1).toString();
 };
 
-const serializeNode = (node: Node): Node[] => {
-  const deps = node.data.info?.dependencies;
-  const serialNodes: Node[] = [];
-  if (deps?.length !== 0) {
-    for (const dep of deps) {
-      const tmpNode = serializeNode(dep);
-      serialNodes.push(...tmpNode);
-    }
-  }
-
-  serialNodes.push(node);
-  return serialNodes;
-};
-
 const addPosition = (node: Node): Node => {
   return {
     ...node,
     position: {
       x: 100,
-      y: 200 * node.data.info.depth,
+      y: 200 * node.data.depth,
     },
   };
 };
 
-const addLabel = (node: Node): Node => {
-  //const lable = `${node.data.info.name}\n${node.data.info.viewName}\n${node.data.info.expression} = ${node.data.info.currentValue} ${node.data.info.unit}\nexpected: ${node.data.info?.expected} ${node.data.info.unit}`;
-  const lable = `${node.data.info.name}\n${node.data.info.viewName}\n${node.data.info.expression} = ${node.data.info.currentValue} ${node.data.info.unit}`;
+const addLabel = (node: Node, isDebug: boolean): Node => {
+  let label, value;
+  if (node.data.currentValue !== undefined) {
+    value = "error";
+  } else {
+    value = node.data.currentValue.toFixed(2);
+  }
+
+  if (isDebug) {
+    label = `${node.data.name}\n${node.data.viewName}\n${node.data.expression} = ${node.data.currentValue} ${node.data.unit}`;
+  } else {
+    label = `${node.data.viewName}\n${node.data.currentValue} ${node.data.unit}`;
+  }
+
   return {
     ...node,
     data: {
       ...node.data,
-      label: lable,
+      label: label,
     },
   };
 };
 
-const createElements = (nodes: Node[]) => {
-  const addedDependencyNamesNodes: Node[] = [];
-  for (const node of nodes) {
-    const dependencyNames: string[] = extractDependencyNames(node);
-    const newNode: Node = {
-      ...node,
-      data: {
-        ...node.data,
-        label: "",
-        info: {
-          ...node.data.info,
-          dependencyNames: dependencyNames,
-        },
-      },
-    };
-    addedDependencyNamesNodes.push(newNode);
-  }
+const createElements = (nodes: Node[], isDebug: boolean) => {
+  // Dependency variables of node names are updated.
+  const addedDependsOnParamsNodes: Node[] = addDependsOnParams(nodes);
 
-  const addedDependenciesNodes: Node[] = addDependencies(
-    addedDependencyNamesNodes,
-  );
+  console.log("addedDependsOnParamsNodes", addedDependsOnParamsNodes);
+  const startIds = ["0"];
+  const calcNodes = calculateGraph(addedDependsOnParamsNodes, startIds[0]);
+  const edges = createEdge(calcNodes);
 
-  // TODO: targetNode should be selected by user.
-  const targetNode = addedDependenciesNodes[0];
-  const graphNodes: Node = makeNodeGraph(targetNode, addedDependenciesNodes);
-
-  const calculatedNodes = calculateGraph(graphNodes);
-  const serialNodes = serializeNode(calculatedNodes);
-
-  const edges: Edge[] = [];
-  for (const node of serialNodes) {
-    const edges_tmp = createEdge(node);
-    for (const edge of edges_tmp) {
-      edges.push(edge);
-    }
-  }
-
-  const elements = [];
-  for (const node of serialNodes) {
-    elements.push(addLabel(addPosition(node)));
-  }
-  for (const edge of edges) {
-    elements.push(edge);
-  }
+  const elements: (Node | Edge)[] = [];
+  calcNodes.map(node => elements.push(addLabel(addPosition(node), isDebug)));
+  edges.map(edge => elements.push(edge));
 
   return elements;
 };
 
 export const Graph: React.FC = () => {
+  // for internal debug
+  const [isDebug, setIsDebug] = useState(false);
+  const handleDebugToggle = () => {
+    setIsDebug(prev => !prev);
+  };
+
   const [name, setName] = useState("");
   const [viewName, setViewName] = useState<string>("");
   const [initValue, setInitValue] = useState<number>(0);
@@ -141,58 +116,51 @@ export const Graph: React.FC = () => {
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
   const [nodesData, setNodesData] = useState<Data[]>(EXAMPLE_DATA);
 
+  const deepEqual = (obj1: any, obj2: any) => {
+    return JSON.stringify(obj1) === JSON.stringify(obj2);
+  };
+
+  useEffect(() => {
+    const nodes: Node[] = nodesData.map(data => ({
+      group: "nodes",
+      data: data,
+    }));
+    console.log("nodesData", nodesData);
+
+    const newElements = createElements(nodes, isDebug);
+
+    // if NOT updated element, don't render.
+    if (!deepEqual(newElements, elements)) {
+      setElements(newElements);
+    }
+  }, [nodesData, isDebug]);
+
   const handleNodeSelection = (e: any) => {
     const selectedNode = e.target._private.data;
     console.log("---selectedNode---");
     console.log(selectedNode);
-    setName(selectedNode.info.name);
-    setViewName(selectedNode.info.viewName);
-    setInitValue(selectedNode.info.initValue);
-    setUnit(selectedNode.info.unit);
-    setExpression(selectedNode.info.expression);
-    setDesc(selectedNode.info.description);
+    setName(selectedNode.name);
+    setViewName(selectedNode.viewName);
+    setInitValue(selectedNode.initValue);
+    setUnit(selectedNode.unit);
+    setExpression(selectedNode.expression);
+    setDesc(selectedNode.description);
   };
-
-  const nodes: Node[] = [];
-  for (const data of nodesData) {
-    const node: Node = {
-      group: "nodes",
-      data: data,
-    };
-    nodes.push(node);
-  }
-
-  const elementFromNode = () => {
-    const nodes: Node[] = [];
-    for (const data of nodesData) {
-      const node: Node = {
-        group: "nodes",
-        data: data,
-      };
-      nodes.push(node);
-    }
-
-    const elements = createElements(nodes);
-    setElements(elements);
-  };
-
-  useEffect(elementFromNode, []);
-  useEffect(elementFromNode, [nodesData]);
 
   const handleEditNodeButtonClick = () => {
     const targetName = name;
     const targetNodeIdx = nodesData.findIndex(
-      (data) => data.info.name === targetName,
+      (data) => data.name === targetName,
     );
 
     if (targetNodeIdx !== -1) {
       const updatedNodesData = [...nodesData];
-      updatedNodesData[targetNodeIdx].info.name = name;
-      updatedNodesData[targetNodeIdx].info.viewName = viewName;
-      updatedNodesData[targetNodeIdx].info.initValue = initValue;
-      updatedNodesData[targetNodeIdx].info.unit = unit;
-      updatedNodesData[targetNodeIdx].info.expression = expression;
-      updatedNodesData[targetNodeIdx].info.description = desc;
+      updatedNodesData[targetNodeIdx].name = name;
+      updatedNodesData[targetNodeIdx].viewName = viewName;
+      updatedNodesData[targetNodeIdx].initValue = initValue;
+      updatedNodesData[targetNodeIdx].unit = unit;
+      updatedNodesData[targetNodeIdx].expression = expression;
+      updatedNodesData[targetNodeIdx].description = desc;
       setNodesData(updatedNodesData);
     }
     console.log("nodesData");
@@ -204,20 +172,17 @@ export const Graph: React.FC = () => {
     // TODO: properties should be selected by user.
     const newData: Data = {
       id: id,
-      info: {
-        name: name,
-        viewName: viewName,
-        expression: expression,
-        unit: unit,
-        status: "calc",
-        initValue: 0,
-        expected: 0,
-        dependencies: [],
-        dependencyNames: [],
-        depth: 0,
-        description: desc,
-        isVisited: false,
-      },
+      name: name,
+      viewName: viewName,
+      expression: expression,
+      unit: unit,
+      status: "calc",
+      initValue: 0,
+      expected: 0,
+      dependsOnParams: [],
+      depth: 0,
+      description: desc,
+      isVisited: false,
     };
 
     const updatedData = [...nodesData, newData];
@@ -228,29 +193,38 @@ export const Graph: React.FC = () => {
     const newNodesData: Data[] = [];
     for (const d of data) {
       const newData: Data = {
-        id: d.id,
-        info: {
-          name: d.name,
-          viewName: d.viewName,
-          expression: d.expression ? d.expression : "",
-          unit: d.unit,
-          status: d.status,
-          initValue: d.initValue,
-          expected: d.expected,
-          dependencies: d.dependencies,
-          dependencyNames: d.dependencyNames,
-          depth: d.depth,
-          description: d.description,
-          isVisited: false,
-        },
+        id: d.id.toString(),
+        name: d.name,
+        viewName: d.viewName,
+        expression: d.expression ? d.expression : "",
+        unit: d.unit,
+        status: d.status,
+        initValue: d.initValue,
+        expected: d.expected,
+        dependsOnParams: d.dependsOnParams,
+        depth: d.depth,
+        description: d.description,
+        isVisited: false,
       };
       newNodesData.push(newData);
     }
-    setNodesData(newNodesData);
+
+    // if NOT updated data, don't render.
+    if (!deepEqual(newNodesData, nodesData)) {
+      setNodesData(newNodesData);
+    }
   };
 
   return (
     <>
+      <div>
+        <Button
+          onClick={handleDebugToggle}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          {isDebug ? 'ON' : 'OFF'}
+        </Button>
+      </div>
       <div>
         <CsvReader onDataLoad={handleCsvData} />
       </div>
