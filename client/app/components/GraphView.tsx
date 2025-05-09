@@ -11,64 +11,9 @@ import {
 } from "./parse";
 import { calculateGraph } from "./calc";
 import { CsvReader } from "../components/ImportCsv";
-
-export interface Node {
-  group: "nodes";
-  data: Data;
-  position?: { x: number; y: number };
-}
-
-export interface Edge {
-  group: "edges";
-  data: EdgeData;
-}
-
-export interface Data {
-  id: string;
-  label?: string;
-  info: Info;
-}
-
-export interface EdgeData {
-  id: string;
-  label?: string;
-  source: string;
-  target: string;
-  value?: number;
-}
-
-interface Info {
-  name: string;
-  viewName: string;
-  expression: string;
-  unit: string;
-  status: string;
-  currentValue?: number;
-  initValue: number;
-  expected: number;
-  dependencies: Node[];
-  dependencyNames: string[];
-  depth: number;
-  description: string;
-  isVisited: boolean;
-}
-
-interface Csv {
-  id: string;
-  name: string;
-  viewName: string;
-  expression: string;
-  unit: string;
-  status: string;
-  // currentValue?: number;
-  initValue: number;
-  expected: number;
-  dependencies: Node[];
-  dependencyNames: string[];
-  depth: number;
-  description: string;
-  // isVisited: boolean;
-}
+import { EXAMPLE_DATA } from "./GraphExample";
+import { ELEMENT_STYLE } from "./GraphStyle";
+import { Data, Node, Edge, Csv } from "./types";
 
 const createEdge = (node: Node): Edge[] => {
   const edges: Edge[] = [];
@@ -100,134 +45,6 @@ const getUniqueNodeID = (data: Data[]): string => {
 
   return (maxId + 1).toString();
 };
-
-const EXAMPLE_DATA: Data[] = [
-  {
-    id: "0",
-    info: {
-      name: "result",
-      viewName: "Top Node",
-      expression: "a + b",
-      unit: "V",
-      status: "calc",
-      initValue: 0,
-      expected: 9,
-      dependencies: [],
-      dependencyNames: [],
-      depth: 0,
-      description: "",
-      isVisited: false,
-    },
-  },
-  {
-    id: "1",
-    info: {
-      name: "a",
-      viewName: "View a",
-      expression: "c + d",
-      unit: "V",
-      status: "calc",
-      initValue: 1,
-      expected: 7,
-      dependencies: [],
-      dependencyNames: [],
-      depth: 1,
-      description: "",
-      isVisited: false,
-    },
-  },
-  {
-    id: "2",
-    info: {
-      name: "b",
-      viewName: "View b",
-      expression: "",
-      unit: "V",
-      status: "calc",
-      initValue: 2,
-      expected: 2,
-      dependencies: [],
-      dependencyNames: [],
-      depth: 1,
-      description: "",
-      isVisited: false,
-    },
-  },
-  {
-    id: "3",
-    info: {
-      name: "c",
-      viewName: "View c",
-      expression: "",
-      unit: "V",
-      status: "input",
-      initValue: 3,
-      expected: 3,
-      dependencies: [],
-      dependencyNames: [],
-      depth: 2,
-      description: "",
-      isVisited: false,
-    },
-  },
-  {
-    id: "4",
-    info: {
-      name: "d",
-      viewName: "View d",
-      expression: "",
-      unit: "V",
-      status: "input",
-      initValue: 4,
-      expected: 4,
-      dependencies: [],
-      dependencyNames: [],
-      depth: 2,
-      description: "",
-      isVisited: false,
-    },
-  },
-];
-
-const ELEMENT_STYLE = [
-  {
-    selector: "node",
-    style: {
-      shape: "rectangle", // Set shape to rectangle (square when width equals height)
-      "border-width": "2px",
-      "border-color": "gray",
-      "border-cap": "round",
-      width: "200px", // Set width of the node
-      height: "100px", // Set height of the node
-      "background-color": "#6FB1FC",
-      label: "data(label)",
-      "text-valign": "center",
-      "text-halign": "center",
-      "font-size": "14px",
-      color: "#ffffff",
-      "text-wrap": "wrap", // Allow text to wrap within the node
-      "text-max-width": "80px", // Set maximum width for text wrapping
-    },
-  },
-  {
-    selector: "edge",
-    style: {
-      width: 3,
-      "line-color": "#ccc",
-      "target-arrow-color": "#ccc",
-      "target-arrow-shape": "triangle",
-    },
-  },
-  {
-    selector: "node:selected",
-    style: {
-      "border-width": "4px",
-      "border-color": "#FF5733",
-      "background-color": "#FFB6C1",
-      "text-outline-color": "#FF5733",
-    },
-  },
-];
 
 const serializeNode = (node: Node): Node[] => {
   const deps = node.data.info?.dependencies;
@@ -284,7 +101,7 @@ const createElements = (nodes: Node[]) => {
   }
 
   const addedDependenciesNodes: Node[] = addDependencies(
-    addedDependencyNamesNodes
+    addedDependencyNamesNodes,
   );
 
   // TODO: targetNode should be selected by user.
@@ -365,7 +182,7 @@ export const Graph: React.FC = () => {
   const handleEditNodeButtonClick = () => {
     const targetName = name;
     const targetNodeIdx = nodesData.findIndex(
-      (data) => data.info.name === targetName
+      (data) => data.info.name === targetName,
     );
 
     if (targetNodeIdx !== -1) {
